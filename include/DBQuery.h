@@ -15,7 +15,7 @@ class DBQuery{
         DBQuery();
         ~DBQuery();
 
-        void insert(std::string query);
+        int insert(std::string query);
 
         void query(std::string query);
 

@@ -25,9 +25,9 @@ std::shared_ptr<httpserver::http_response> insert_data::render(const httpserver:
 
     ret_val += parse_csv(data);
 
-    
-    ss << "Inserting data into queue; Queue size before insert:" << m_tsq.size();
+    ss << "Inserting data into queue: " << data;
     m_logger.log_trace(ss.str(), "GENTRACE");
+    //std::cout << "Queue size before insert:" << m_tsq.size() << std::endl;
 
     m_tsq.push(m_data_map);
     
@@ -69,15 +69,15 @@ void insert_data::consume_thread() noexcept{
         DBQuery dbq;
  
         std::map<std::string,std::string> temp_map = m_tsq.pop();
-        ss << "Queue size reduced to:" << m_tsq.size();
 
         // Build insert queries
         ssq1 << "INSERT INTO History (Temperature, Humidity) VALUES(" << temp_map["Temperature"] << "," << temp_map["Humidity"] << ")";
         ssq2 << "INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << temp_map["DeviceID"] << ",LAST_INSERT_ID(),'" << temp_map["CurrentDateTime"] << "')";
 
         dbq.insert(ssq1.str());
-        dbq.insert(ssq2.str()); // update insert() to return string and log successful query
+        dbq.insert(ssq2.str());
 
+        ss << "Queue size reduced by 1 to: " << m_tsq.size();
         m_logger.log_trace(ss.str(), "GENTRACE");
     }
 }

@@ -29,7 +29,7 @@ Logging::Logging(){}
 void Logging::init(){
     // Setup the common formatter for all sinks
     boost::log::formatter fmt = boost::log::expressions::stream
-        << boost::log::expressions::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S")
+        << boost::log::expressions::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S:%f")
         << " [" << severity << "]"
         << boost::log::expressions::if_(boost::log::expressions::has_attr(tag_attr))[
                boost::log::expressions::stream << "[" << tag_attr << "] "
