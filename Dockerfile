@@ -40,6 +40,14 @@ RUN cd /tmp && \
 # set env variables otherwise libhttpserver doesn't work
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
+RUN git clone https://github.com/nlohmann/json.git && \
+    cd json && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install
+
 # Install mariadb conn/c++
 #RUN wget https://dlm.mariadb.com/2531503/Connectors/cpp/connector-cpp-1.0.2/mariadb-connector-cpp-1.0.2-debian-bullseye-aarch64.tar.gz && \
 #    tar -xvzf mariadb-connector-cpp-*.tar.gz && \

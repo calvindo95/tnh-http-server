@@ -17,6 +17,8 @@ find_package(Boost COMPONENTS log log_setup REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 
+find_package(nlohmann_json 3.2.0 REQUIRED)
+
 #find_path(MariaDBClient_INCLUDE_DIR
 #        NAMES mysql.h
 #        PATH_SUFFIXES mariadb mysql
