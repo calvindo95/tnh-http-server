@@ -7,7 +7,7 @@ WantedBy=multi-user.target
 After=network.target
 
 [Service]
-Type=simple
+Type=forking
 ExecStart=/home/webserver/source_directory/run_server.sh
 WorkingDirectory=/home/webserver/source_directory
 Restart=always

@@ -20,7 +20,7 @@ cd /home/webserver/source_directory
 
 if [ -f ./build/src/server ];
 then
-    ./build/src/server
+    ./build/src/server&
 else
     echo "./build/src/server not found"
     exit
