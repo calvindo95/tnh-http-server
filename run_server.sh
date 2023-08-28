@@ -16,6 +16,8 @@ export DB_NAME=humidity_tracker
 export DB_PORT=3306
 # END DB SERVER SETTINGS
 
+cd /home/webserver/source_directory
+
 if [ -f ./build/src/server ];
 then
     ./build/src/server

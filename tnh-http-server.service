@@ -1,0 +1,17 @@
+[Unit]
+Description=Service that keeps running the tnh-http-server from startup.
+
+[Install]
+WantedBy=multi-user.target
+
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/webserver/source_directory/run_server.sh
+WorkingDirectory=/home/webserver/source_directory
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=%n

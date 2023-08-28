@@ -42,8 +42,8 @@ int main(int argc, char** argv) {
     check_connection hwr;
     ws.register_resource("/helloworld", &hwr);
     
-    insert_data id;
-    ws.register_resource("/input_data", &id);
+    post_json pj;
+    ws.register_resource("/post_json", &pj);
 
     // start web server
     ws.start(true);

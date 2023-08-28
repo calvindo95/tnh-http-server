@@ -61,14 +61,17 @@ void DBQuery::query(std::string query){
     mysql_free_result(result);
 }
 
-void DBQuery::insert(std::string query){
+int DBQuery::insert(std::string query){
     // Create logic to check if it's an insert
 
     // End logic
 
     if(mysql_query(m_conn, query.c_str())){
         std::cout << "error running query: " << query << std::endl;
+        return 1;
     }
+    
+    return 0;
 }
 
 int DBQuery::get_last_insert_id(){
