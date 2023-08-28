@@ -51,11 +51,23 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
 }
 
 int post_json::parse_json(std::string json_string){
+    std::stringstream ss;
     m_json = nlohmann::json::parse(json_string);
 
+    // Check if json has correct number of key/values
     if(m_json.size() != 5){
         m_logger.log_trace("Input json does not have correct size(5)", "GENTRACE");
         return 1;
+    }
+
+    // Check if correct keys
+    std::vector<std::string> tmp_vec{"DeviceID", "hash", "CurrentDateTime", "Temperature", "Humidity"};
+    for(int i = 0; i < tmp_vec.size(); i++){
+        if(m_json.count(tmp_vec[i]) != 1){
+            ss << "JSON key value: '" << tmp_vec[i] << "' is not present in post json";
+            m_logger.log_trace(ss.str(), "GENTRACE");
+            return 1;
+        }
     }
     return 0;
 }
