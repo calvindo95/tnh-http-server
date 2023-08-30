@@ -21,9 +21,9 @@ int main(int argc, char** argv) {
     Logging log;
     log.init();
 
-    std::atomic<bool> stop_thread_flag = false;
-    Performance_Monitoring pm(stop_thread_flag);
-    std::thread t(&Performance_Monitoring::run, std::ref(pm));
+    //std::atomic<bool> stop_thread_flag = false;
+    //Performance_Monitoring pm(stop_thread_flag);
+    //std::thread t(&Performance_Monitoring::run, std::ref(pm));
 
     httpserver::create_webserver cw = httpserver::create_webserver(config.GET_HTTP_PORT())
         // set required parameters
