@@ -18,3 +18,5 @@ target_link_libraries(resource logging dbquery nlohmann_json::nlohmann_json)
 
 add_executable(${TARGET} main.cpp)
 target_link_libraries(${TARGET} httpserver microhttpd config performance resource)
+
+install(TARGETS ${TARGET})
