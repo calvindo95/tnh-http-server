@@ -76,18 +76,16 @@ void post_json::consume_thread() noexcept{
     while(true){
         int ret_val = 0;
         std::stringstream ss;
-        std::stringstream ssq1;
-        std::stringstream ssq2;
+        std::stringstream ssq;
         DBQuery dbq;
  
         nlohmann::json j = m_tsq.pop();
 
-        // Build insert queries
-        ssq1 << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << ")";
-        ssq2 << "INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ")";
+        // Build insert query
+        ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << ");";
+        ssq << "INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
-        ret_val += dbq.insert(ssq1.str());
-        ret_val += dbq.insert(ssq2.str());
+        ret_val += dbq.insert(ssq.str());
 
         if(ret_val != 0){
             ss << "Error inserting json data: " << j;

@@ -21,7 +21,7 @@ DBQuery::DBQuery(){
         config.GET_DB_NAME().c_str(),
         config.GET_DB_PORT(),
         NULL,
-        0
+        CLIENT_MULTI_STATEMENTS
     )){
         std::stringstream ss;
         ss << "Error connecting to db server: " << mysql_error(m_conn);
