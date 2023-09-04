@@ -82,18 +82,17 @@ void post_json::consume_thread() noexcept{
         nlohmann::json j = m_tsq.pop();
 
         // Build insert query
-        ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << ");";
-        ssq << "INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
+        ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
+                INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
         ret_val += dbq.insert(ssq.str());
 
         if(ret_val != 0){
             ss << "Error inserting json data: " << j;
             m_logger.log_trace(ss.str(), "GENTRACE");
+            ss.clear();
+            ss.str(std::string());
         }
-
-        ss.clear();
-        ss.str(std::string());
 
         ss << "Queue size reduced by 1 to: " << m_tsq.size();
         m_logger.log_trace(ss.str(), "GENTRACE");
