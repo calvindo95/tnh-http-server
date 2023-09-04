@@ -6,24 +6,20 @@ RUN apt upgrade -y
 
 # Install packages
 RUN apt -y install libmicrohttpd-dev
+RUN apt -y install gnutls-bin
+RUN apt -y install libssl-dev
 RUN apt -y install git
-RUN apt -y install curl
+RUN apt -y install curl wget
 RUN apt -y install libtool
 RUN apt -y install m4
-RUN apt -y install automake
-RUN apt -y install cmake
-RUN apt -y install make
-RUN apt -y install clang
-RUN apt -y install libgtest-dev
-RUN apt -y install wget
-RUN apt -y install libcurl4-openssl-dev
-RUN apt -y install libmariadb-dev
-RUN apt -y install g++
-RUN apt -i install systemctl
-RUN apt -y install vim
-
+RUN apt -y install cmake make automake
+RUN apt -y install g++ clang
+RUN apt -y install systemctl
 RUN apt -y install libboost-dev 
-#RUN apt -y install libboost-all-dev
+RUN apt -y install libmariadb-dev
+RUN apt -y install nlohmann-json-dev
+RUN apt -y install libcurl4-openssl-dev
+RUN apt -y install vim
 
 # install libhttpserver
 RUN cd /tmp && \
@@ -33,20 +29,12 @@ RUN cd /tmp && \
     mkdir build && \
     cd build && \
     ../configure && \
-    make && \
+    make -j4 && \
     make install && \
     ldconfig -v
 
 # set env variables otherwise libhttpserver doesn't work
 ENV LD_LIBRARY_PATH=/usr/local/lib
-
-RUN git clone https://github.com/nlohmann/json.git && \
-    cd json && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make && \
-    make install
 
 # Install mariadb conn/c++
 #RUN wget https://dlm.mariadb.com/2531503/Connectors/cpp/connector-cpp-1.0.2/mariadb-connector-cpp-1.0.2-debian-bullseye-aarch64.tar.gz && \
