@@ -14,7 +14,7 @@ add_library(performance STATIC Performance.cpp)
 target_link_libraries(performance ${Boost_LIBRARIES} logging)
 
 add_library(resource STATIC Resource.cpp)
-target_link_libraries(resource logging dbquery nlohmann_json::nlohmann_json)
+target_link_libraries(resource logging dbquery)
 
 add_executable(${TARGET} main.cpp)
 target_link_libraries(${TARGET} httpserver microhttpd config performance resource)

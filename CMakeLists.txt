@@ -15,7 +15,7 @@ find_package(Boost COMPONENTS log log_setup REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 
-find_package(nlohmann_json 3.2.0 REQUIRED)
+#find_package(nlohmann_json 3.2.0 REQUIRED)
 
 ## add directories
 add_subdirectory(src)
