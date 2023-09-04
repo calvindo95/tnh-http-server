@@ -12,72 +12,89 @@ std::shared_ptr<httpserver::http_response> check_connection::render(const httpse
     return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Hello, World!"));
 }
 
-insert_data::insert_data(){
+/********************
+ 
+Class post_json
+
+********************/
+post_json::post_json(){
     // Initialize consuming thread
-    std::thread t1(&insert_data::consume_thread, this);
+    std::thread t1(&post_json::consume_thread, this);
     t1.detach();
 }
 
-std::shared_ptr<httpserver::http_response> insert_data::render(const httpserver::http_request& req) {
+std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::http_request& req) {
     int ret_val = 0; 
     std::stringstream ss;
-    std::string data = std::string(req.get_arg("data")); // Update data to parse json instead of csv
-
-    ret_val += parse_csv(data);
-
+    nlohmann::json tmp_j;
     
-    ss << "Inserting data into queue; Queue size before insert:" << m_tsq.size();
-    m_logger.log_trace(ss.str(), "GENTRACE");
+    std::map<std::string_view, std::string_view, httpserver::http::header_comparator> headers;
+    headers = req.get_headers();
 
-    m_tsq.push(m_data_map);
-    
-    return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val)));
-}
-
-int insert_data::parse_csv(std::string csv){
-    // dev_id,pw,time,temperature,humidity
-    std::vector<std::string> temp_vec;
-    std::stringstream ss(csv);
-
-    // Break csv into vector
-    while(ss.good()){
-        std::string substr;
-        getline(ss,substr, ',');
-        temp_vec.push_back(substr);
+    if(headers["Content-Type"] != "application/json"){
+        m_logger.log_trace(std::string("Post request Content-Type is not application/json"), "GENTRACE");
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1) + "\n"));
     }
 
-    if(temp_vec.size() != 5){
-        m_logger.log_trace("Input csv does not have correct indexes", "GENTRACE");
+    // Get body of request to string
+    std::string tmp = std::string(req.get_content());
+
+    // Parse json string into json object
+    ret_val += parse_json(tmp,tmp_j);
+
+    if(ret_val == 0){
+        ss << "Inserting data into queue: " << tmp_j;
+        m_logger.log_trace(ss.str(), "GENTRACE");
+        m_tsq.push(tmp_j);
+    }
+
+    return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val) + "\n"));
+}
+
+int post_json::parse_json(std::string json_string, nlohmann::json& json){
+    std::stringstream ss;
+    json = nlohmann::json::parse(json_string);
+
+    // Check if json has correct number of key/values
+    if(json.size() != 5){
+        m_logger.log_trace("Input json does not have correct size(5)", "GENTRACE");
         return 1;
     }
 
-    m_data_map["DeviceID"]          = temp_vec[0];
-    m_data_map["hash"]              = temp_vec[1];
-    m_data_map["CurrentDateTime"]   = temp_vec[2];
-    m_data_map["Temperature"]       = temp_vec[3];
-    m_data_map["Humidity"]          = temp_vec[4];
-
+    // Check if correct keys
+    for(int i = 0; i < m_json_keys.size(); i++){
+        if(json.count(m_json_keys[i]) != 1){
+            ss << "JSON key value: '" << m_json_keys[i] << "' is not present in post json";
+            m_logger.log_trace(ss.str(), "GENTRACE");
+            return 1;
+        }
+    }
     return 0;
 }
 
-void insert_data::consume_thread() noexcept{
-
+void post_json::consume_thread() noexcept{
     while(true){
+        int ret_val = 0;
         std::stringstream ss;
-        std::stringstream ssq1;
-        std::stringstream ssq2;
+        std::stringstream ssq;
         DBQuery dbq;
  
-        std::map<std::string,std::string> temp_map = m_tsq.pop();
-        ss << "Queue size reduced to:" << m_tsq.size();
+        nlohmann::json j = m_tsq.pop();
 
-        // Build insert queries
-        ssq1 << "INSERT INTO History (Temperature, Humidity) VALUES(" << temp_map["Temperature"] << "," << temp_map["Humidity"] << ")";
-        ssq2 << "INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << temp_map["DeviceID"] << ",LAST_INSERT_ID(),'" << temp_map["CurrentDateTime"] << "')";
+        // Build insert query
+        ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
+                INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
-        dbq.insert(ssq1.str());
-        dbq.insert(ssq2.str()); // update insert() to return string and log successful query
+        ret_val += dbq.insert(ssq.str());
 
+        if(ret_val != 0){
+            ss << "Error inserting json data: " << j;
+            m_logger.log_trace(ss.str(), "GENTRACE");
+            ss.clear();
+            ss.str(std::string());
+        }
+
+        ss << "Queue size reduced by 1 to: " << m_tsq.size();
         m_logger.log_trace(ss.str(), "GENTRACE");
     }
 }

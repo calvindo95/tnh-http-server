@@ -1,18 +1,6 @@
 # https-server-cd
 # 1. Setup Environment
-## 1.1 Clone PKI repo and create CA certificates
-First we will need to clone the PKI repo
-```
-cd ~/
-git clone https://github.com/Smooth-Pacific/https-server-pki-cd.git
-```
-We will then move into the repository and run the `create_ca.sh` script which will create the necessary CA certificates in `~/certs`.
-```
-cd https-server-pki-cd
-sh create_ca.sh
-```
-
-## 1.2 Clone HTTPS server repo
+## 1.1 Clone HTTPS server repo
 We can now clone and enter the https server repository
 ```
 cd ~/
@@ -20,27 +8,19 @@ git clone https://github.com/Smooth-Pacific/https-server-cd.git
 cd https-server-cd
 ```
 
-## 1.3 Build docker image
+## 1.2 Build docker image
 We can now build the docker image with the following script:
 ```
 sh build_img.sh Dockerfile
 ```
 The script will automatically copy the CA certificates from the `~/certs` (created in step 1.1) directory to `./certs` in the current repo directory and copy `./certs` to `~/certs` in the container. This will allow docker to build the image with the correct certificate, as docker cannot access any other parent folders.
 
-## 1.4 Spinup and attach to docker container
+## 1.3 Spinup and attach to docker container
 Once the docker image is created, we can spinup and attach to the container as user webserver.
 ```
 sh spinup.sh && sh attach.sh
 ```
 The `attach.sh` script can be used separately to attach to the container in a new terminal
-
-## 1.5 Check that the Root Certificate was installed successfully
-Once we are attached to the container, we now need to check that the root certificate was installed successfully. If the root certificate has been validated we can exit the container via the command `exit`
-```
-awk -v cmd='openssl x509 -noout -subject' '/BEGIN/{close(cmd)};{print | cmd}' < /etc/pki/ca-trust/source/anchors/smoothstack_root.crt | grep smoothstack
-
-exit
-```
 
 # 2. Build and Run the webserver
 ## 2.1 Build project inside docker container
@@ -53,9 +33,11 @@ Once attached, we can now navigate to the project folder and build.
 cd ~/source_directory
 mkdir build && cd build
 cmake ..
-make
+cmake --build . -j4
+OR
+cmake --build . -j4 --target install
 ```
-These commands will create a binary `./server` in the `~/source_directory/build` directory and `./test` in the `~/source_directory/test` directory.
+These commands will create a binary `./tnh-server` in the `~/source_directory/build/src` directory  OR install `tnh-server` binary in `/usr/local/bin/tnh-server`
 
 ## 2.2 Customizing server options
 Before we run the server we can modify server settings in the `run_server.sh` script. The server options should look like:

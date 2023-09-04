@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # START SERVER OPTIONS
-export HTTP_PORT=8081
-export MAX_CONNECTIONS=32
+export HTTP_PORT=8082
+export MAX_CONNECTIONS=128
 export CONNECTION_TIMEOUT=120
 export MEMORY_LIMIT=65535
 export MAX_THREADS=8
@@ -16,9 +16,11 @@ export DB_NAME=humidity_tracker
 export DB_PORT=3306
 # END DB SERVER SETTINGS
 
+cd /home/webserver/source_directory
+
 if [ -f ./build/src/server ];
 then
-    ./build/src/server
+    ./build/src/tnh-server
 else
     echo "./build/src/server not found"
     exit
