@@ -25,6 +25,7 @@ class Logging{
         
         // logging methods
         void log_trace(const std::string& msg, const std::string& filter = "");
+        void log_trace(const std::stringstream& msg, const std::string& filter = "");
 };
 
 #endif

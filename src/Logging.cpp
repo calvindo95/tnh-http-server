@@ -44,6 +44,8 @@ void Logging::init(){
     sink->locked_backend()->add_stream(
         boost::make_shared<std::ofstream>("all.log"));
     sink->set_formatter(fmt);
+        sink->set_filter(severity >= trace && (         // filter attributes
+        boost::log::expressions::has_attr(tag_attr) && tag_attr == "ALL"));
     boost::log::core::get()->add_sink(sink);
     sink->locked_backend()->auto_flush(false);       // sets autoflush; this needs to set to false in prod(true for testing)
 
@@ -78,6 +80,15 @@ void Logging::log_trace(const std::string& msg, const std::string& filter){
     
     BOOST_LOG_SCOPED_THREAD_TAG("Tag", buffer);
     BOOST_LOG_SEV(severity_log, Logging::severity_level::trace) << msg;
+}
+
+void Logging::log_trace(const std::stringstream& msg, const std::string& filter){
+    boost::log::sources::severity_logger_mt<severity_level> severity_log;       // need to use _mt to allow multithreading
+    char* buffer = new char[filter.length() +1];
+    std::strcpy(buffer, filter.c_str());
+    
+    BOOST_LOG_SCOPED_THREAD_TAG("Tag", buffer);
+    BOOST_LOG_SEV(severity_log, Logging::severity_level::trace) << msg.str();
 }
 
 // helper function to make human-readable severity level
