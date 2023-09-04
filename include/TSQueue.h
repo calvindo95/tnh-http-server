@@ -31,9 +31,7 @@ class TSQueue{
             std::unique_lock<std::mutex> lock(m_mutex);
 
             // Wait until queue is not empty
-            m_cond.wait(lock, [this]{
-                return !m_queue.empty();
-            });
+            m_cond.wait(lock, [this]{return !m_queue.empty();});
 
             // Get item from queue and pop
             T item = m_queue.front();
