@@ -33,7 +33,7 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
 
     if(headers["Content-Type"] != "application/json"){
         m_logger.log_trace(std::string("Post request Content-Type is not application/json"), "GENTRACE");
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1) + "\n"));
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
     }
 
     // Get body of request to string
@@ -48,7 +48,7 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
         m_tsq.push(tmp_j);
     }
 
-    return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val) + "\n"));
+    return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val)));
 }
 
 int post_json::parse_json(std::string json_string, nlohmann::json& json){

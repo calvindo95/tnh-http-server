@@ -10,7 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_COMPILER /usr/bin/gcc CACHE PATH "")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_ALL_DYN_LINK -pthread -g" CACHE STRING "compile flags" FORCE)
 
-find_package(GTest REQUIRED)
 find_package(Boost COMPONENTS log log_setup REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
