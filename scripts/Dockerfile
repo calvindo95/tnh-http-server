@@ -38,7 +38,7 @@ USER webserver
 WORKDIR /home/webserver
 
 RUN git clone -b develop https://github.com/calvindo95/tnh-http-server.git && \
-    cd tnh-http-server/include && cd .. && \
+    cd tnh-http-server/include && wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp && cd .. && \
     mkdir build && cd build && \
     cmake .. && \
     cmake --build . -j4

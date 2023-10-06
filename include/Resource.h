@@ -6,7 +6,7 @@
 #include <HTTPResources.h>
 #include <TSQueue.h>
 #include <Logging.h>
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 
 class check_connection : public httpserver::http_resource {
     public:
