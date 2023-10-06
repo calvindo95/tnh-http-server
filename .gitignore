@@ -1,0 +1,7 @@
+.directory
+.vscode
+build
+certs
+src/Makefile
+*.log
+json.hpp
