@@ -25,7 +25,6 @@ post_json::post_json(){
 
 std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::http_request& req) {
     int ret_val = 0; 
-    std::stringstream ss;
     nlohmann::json tmp_j;
     
     std::map<std::string_view, std::string_view, httpserver::http::header_comparator> headers;
@@ -43,9 +42,15 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     ret_val += parse_json(tmp,tmp_j);
 
     if(ret_val == 0){
+        std::stringstream ss;
         ss << "Inserting data into queue: " << tmp_j;
         m_logger.log_trace(ss.str(), "GENTRACE");
         m_tsq.push(tmp_j);
+    }
+    else{
+        std::stringstream ss;
+        ss << "Failed to parse json posted to server: " << tmp;
+        m_logger.log_trace(ss.str(), "GENTRACE");
     }
 
     return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val)));
@@ -76,22 +81,31 @@ void post_json::consume_thread() noexcept{
     while(true){
         int ret_val = 0;
         std::stringstream ss;
-        std::stringstream ssq;
         DBQuery dbq;
  
         nlohmann::json j = m_tsq.pop();
 
-        // Build insert query
-        ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
-                INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
+        // DeviceID hash CurrentDateTime Temperature Humidity
+        if(j.contains("DeviceID") && j.contains("hash") && j.contains("CurrentDateTime") && j.contains("Temperature") && j.contains("Humidity")){
+            std::stringstream ssq;
+            // Build insert query
+            ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
+            INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
-        ret_val += dbq.insert(ssq.str());
+            ret_val += dbq.insert(ssq.str());
 
-        if(ret_val != 0){
-            ss << "Error inserting json data: " << j;
-            m_logger.log_trace(ss.str(), "GENTRACE");
-            ss.clear();
-            ss.str(std::string());
+            if(ret_val != 0){
+                ss << "Error inserting json data: " << j;
+                m_logger.log_trace(ss.str(), "GENTRACE");
+                ss.clear();
+                ss.str(std::string());
+            }
+        }
+
+        // Application Code PID Text Time UID
+        if(j.contains("Application") && j.contains("Code") && j.contains("PID") && j.contains("Text") && j.contains("UID")){
+            ss << j.dump(4) << std::endl;
+            m_logger.log_trace(ss.str(), "EVENT");
         }
 
         ss << "Queue size reduced by 1 to: " << m_tsq.size();

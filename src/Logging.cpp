@@ -69,6 +69,16 @@ void Logging::init(){
     boost::log::core::get()->add_sink(sink);
     sink->locked_backend()->auto_flush(true);       // sets autoflush; needs to be false in prod(true for testing)
 
+    // initialize stream to write to event.log
+    sink = boost::make_shared<text_sink>();
+    sink->locked_backend()->add_stream(
+        boost::make_shared<std::ofstream>("event.log"));
+    sink->set_formatter(fmt);
+    sink->set_filter(severity >= trace && (         // filter attributes
+        boost::log::expressions::has_attr(tag_attr) && tag_attr == "EVENT"));
+    boost::log::core::get()->add_sink(sink);
+    sink->locked_backend()->auto_flush(true);       // sets autoflush; needs to be false in prod(true for testing)
+
     // add attributes
     boost::log::add_common_attributes();
 }
