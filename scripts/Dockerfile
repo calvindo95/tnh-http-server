@@ -1,4 +1,4 @@
-FROM balenalib/raspberrypi3:bullseye
+FROM debian:bullseye
 
 # Update apt repos
 RUN apt update --allow-unauthenticated
@@ -13,7 +13,7 @@ RUN apt -y install cmake make automake
 RUN apt -y install g++ clang
 RUN apt -y install libboost-dev libboost-all-dev
 RUN apt -y install libmariadb-dev
-RUN apt -y install nlohmann-json-dev
+#RUN apt -y install nlohmann-json-dev
 RUN apt -y install vim
 
 # install libhttpserver
