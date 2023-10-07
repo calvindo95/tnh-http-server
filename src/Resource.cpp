@@ -58,22 +58,13 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
 
 int post_json::parse_json(std::string json_string, nlohmann::json& json){
     std::stringstream ss;
-    json = nlohmann::json::parse(json_string);
 
-    // Check if json has correct number of key/values
-    if(json.size() != 5){
+    if(!nlohmann::json::accept(json_string)){
         m_logger.log_trace("Input json does not have correct size(5)", "GENTRACE");
         return 1;
     }
 
-    // Check if correct keys
-    for(int i = 0; i < m_json_keys.size(); i++){
-        if(json.count(m_json_keys[i]) != 1){
-            ss << "JSON key value: '" << m_json_keys[i] << "' is not present in post json";
-            m_logger.log_trace(ss.str(), "GENTRACE");
-            return 1;
-        }
-    }
+    json = nlohmann::json::parse(json_string);
     return 0;
 }
 
