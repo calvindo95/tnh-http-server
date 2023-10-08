@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM balenalib/raspberrypi3:bullseye
 
 # Update apt repos
 RUN apt update --allow-unauthenticated
