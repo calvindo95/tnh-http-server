@@ -1,4 +1,4 @@
-scripts/Dockerfile_arm64FROM debian:bullseye
+FROM debian:bullseye
 
 # Update apt repos
 RUN apt update --allow-unauthenticated
