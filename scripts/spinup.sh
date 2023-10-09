@@ -1,6 +1,6 @@
 # Spins up a Docker container
 
-if [ $# -lt 2 ]; then # checks if number of arguments is less than 1
+if [ $# -lt 3 ]; then # checks if number of arguments is less than 1
     echo "Less than 1 arguments were supplied"
     echo "Usage: 'sh spinup.sh <image name>' <port> <container name>"
 else
