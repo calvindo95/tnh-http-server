@@ -88,8 +88,8 @@ void post_json::consume_thread() noexcept{
             if(ret_val != 0){
                 ss << "Error inserting json data: " << j;
                 m_logger.log_trace(ss.str(), "GENTRACE");
-                ss.clear();
                 ss.str(std::string());
+                ss.clear();
             }
         }
 
@@ -97,6 +97,8 @@ void post_json::consume_thread() noexcept{
         if(j.contains("Application") && j.contains("Code") && j.contains("PID") && j.contains("Text") && j.contains("UID")){
             ss << j.dump(4) << std::endl;
             m_logger.log_trace(ss.str(), "EVENT");
+            ss.str(std::string());
+            ss.clear();
         }
 
         ss << "Queue size reduced by 1 to: " << m_tsq.size();
