@@ -9,7 +9,7 @@ export MAX_THREADS=8
 # END SERVER OPTIONS
 
 # START DB SERVER SETTINGS
-export DB_IP=192.168.1.7
+export DB_IP=192.168.1.174
 export DB_USERNAME=admin
 export DB_PASSWORD=Strawb3rries
 export DB_NAME=humidity_tracker
