@@ -43,13 +43,13 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
 
     if(ret_val == 0){
         std::stringstream ss;
-        ss << "Inserting data into queue: " << tmp_j;
+        ss << "Inserting data into queue: " << tmp_j << std::endl;
         m_logger.log_trace(ss.str(), "GENTRACE");
         m_tsq.push(tmp_j);
     }
     else{
         std::stringstream ss;
-        ss << "Failed to parse json posted to server: " << tmp;
+        ss << "Failed insert json into queue: " << tmp << std::endl;
         m_logger.log_trace(ss.str(), "GENTRACE");
     }
 
@@ -60,7 +60,8 @@ int post_json::parse_json(std::string json_string, nlohmann::json& json){
     std::stringstream ss;
 
     if(!nlohmann::json::accept(json_string)){
-        m_logger.log_trace("Input json does not have correct size(5)", "GENTRACE");
+        ss << "Failed to parse json string: " << json_string << std::endl;
+        m_logger.log_trace(ss.str(), "GENTRACE");
         return 1;
     }
 
