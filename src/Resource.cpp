@@ -96,7 +96,7 @@ void post_json::consume_thread() noexcept{
 
         // Application Code PID Text Time UID
         if(j.contains("Application") && j.contains("Code") && j.contains("PID") && j.contains("Text") && j.contains("UID")){
-            ss << j.dump(4) << std::endl;
+            ss << j.dump() << std::endl;
             m_logger.log_trace(ss.str(), "EVENT");
             ss.str(std::string());
             ss.clear();
