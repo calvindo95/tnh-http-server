@@ -1,4 +1,12 @@
 #include <string>
+#include <json.hpp>
+#include <fstream>
+#include <algorithm>
+#include <thread>
+#include <iostream>
+#include <cstring>
+
+using json = nlohmann::json;
 
 class Config{
     private:
@@ -22,10 +30,10 @@ class Config{
         uint16_t         DB_PORT;
 
         template <typename T>
-        T update_option(T& option, const char* env_var);
+        void update_option(T& option, const char* env_var);
 
         template <typename T, unsigned int base>
-        T update_option(T& option, const char* env_var);
+        void update_option(T& option, const char* env_var);
 
     public:
         static Config& get_instance(bool debug = true);

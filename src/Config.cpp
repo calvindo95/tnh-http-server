@@ -1,7 +1,4 @@
 #include "Config.h"
-#include <thread>
-#include <iostream>
-#include <cstring>
 
 Config::Config(bool debug): 
     DEBUG_FLAG(debug),
@@ -30,36 +27,81 @@ Config::Config(bool debug):
 }
 
 template <typename T>
-T Config::update_option(T& option, const char* env_var){
+void Config::update_option(T& option, const char* env_var){
+    // Check for env var first
     char* buffer = getenv(env_var);
     if(buffer != NULL){
-        return static_cast<T>(getenv(env_var));
+        option = static_cast<T>(getenv(env_var));
     }
     else{
-        return option;
+        std::stringstream ss;
+        ss << "Environment variable: " << env_var << " does not exist, now checking settings.json" << std::endl;
+        std::cerr << ss.str();
+    }
+
+    // Check settings.json
+    std::ifstream ifs;
+    ifs.open("./settings.json");
+
+    json j = json::parse(ifs);
+
+    if(j.contains(env_var)){
+        std::stringstream ss;
+        ss << env_var << " found in settings.json with value: " << j.at(env_var) << std::endl;
+        std::cout << ss.str();
+        option = static_cast<T>(j.at(env_var));
+    }
+    else{
+        std::stringstream ss;
+        ss << "Setting: " << env_var << " does not have environment variable set or not in settings.json" << std::endl;
+        //throw ss.str(); 
     }
 }
 
 template <typename T, unsigned int base>
-T Config::update_option(T& option, const char* env_var){
+void Config::update_option(T& option, const char* env_var){
     char* buffer = getenv(env_var);
     try{
         if(buffer != NULL){
             int env_num = std::stoi(buffer);
             if(env_num > 0 && env_num < 65536){
-                return static_cast<T>(std::stoul(buffer, nullptr, base));
+                option = static_cast<T>(std::stoul(buffer, nullptr, base));
             }
             else{
                 throw(buffer);
             }
         }
         else{
-            return option;
+            option = option;
         }
     }
     catch(const char* e){
         std::cout << "ERROR: " << env_var << " - " << e << " out of bounds" << std::endl;
         exit(1);
+    }
+
+    // Check settings.json
+    std::ifstream ifs;
+    ifs.open("./settings.json");
+
+    json j = json::parse(ifs);
+
+    if(j.contains(env_var)){
+        std::stringstream ss;
+        ss << env_var << " found in settings.json with value: " << j.at(env_var) << std::endl;
+        std::cout << ss.str();
+
+        std::string tmp_str = nlohmann::to_string(j.at(env_var));
+        tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '"'), tmp_str.end());
+
+        const char* buf = tmp_str.c_str();
+        option = static_cast<T>(std::stoul(buf, nullptr, base));
+        std::cout << "here" << std::endl;
+    }
+    else{
+        std::stringstream ss;
+        ss << "Setting: " << env_var << " does not have environment variable set or not in settings.json" << std::endl;
+        //throw ss.str(); 
     }
 }
 
@@ -71,18 +113,18 @@ Config& Config::get_instance(bool debug){
 
 // this should only ever be used for testing purposes outside of the class
 void Config::update_config(){
-    HTTP_PORT           = update_option<uint16_t, 10>   (HTTP_PORT, "HTTP_PORT");
-    HTTPS_MEM_KEY       = update_option<std::string>    (HTTPS_MEM_KEY, "HTTPS_MEM_KEY_PATH");
-    HTTPS_MEM_CERT      = update_option<std::string>    (HTTPS_MEM_CERT, "HTTPS_MEM_CERT_PATH");
-    MAX_CONNECTIONS     = update_option<uint16_t, 10>   (MAX_CONNECTIONS, "MAX_CONNECTIONS");
-    CONNECTION_TIMEOUT  = update_option<uint16_t, 10>   (CONNECTION_TIMEOUT, "CONNECTION_TIMEOUT");
-    MEMORY_LIMIT        = update_option<uint16_t, 10>   (MEMORY_LIMIT, "MEMORY_LIMIT");
-    MAX_THREADS         = update_option<uint16_t, 10>   (MAX_THREADS, "MAX_THREADS");
-    DB_IP               = update_option<std::string>    (DB_IP, "DB_IP");
-    DB_USERNAME         = update_option<std::string>    (DB_USERNAME, "DB_USERNAME");
-    DB_PASSWORD         = update_option<std::string>    (DB_PASSWORD, "DB_PASSWORD");
-    DB_NAME             = update_option<std::string>    (DB_NAME, "DB_NAME");
-    DB_PORT             = update_option<uint16_t, 10>   (DB_PORT, "DB_PORT");
+    update_option<uint16_t, 10>   (HTTP_PORT, "HTTP_PORT");
+    update_option<std::string>    (HTTPS_MEM_KEY, "HTTPS_MEM_KEY_PATH");
+    update_option<std::string>    (HTTPS_MEM_CERT, "HTTPS_MEM_CERT_PATH");
+    update_option<uint16_t, 10>   (MAX_CONNECTIONS, "MAX_CONNECTIONS");
+    update_option<uint16_t, 10>   (CONNECTION_TIMEOUT, "CONNECTION_TIMEOUT");
+    update_option<uint16_t, 10>   (MEMORY_LIMIT, "MEMORY_LIMIT");
+    update_option<uint16_t, 10>   (MAX_THREADS, "MAX_THREADS");
+    update_option<std::string>    (DB_IP, "DB_IP");
+    update_option<std::string>    (DB_USERNAME, "DB_USERNAME");
+    update_option<std::string>    (DB_PASSWORD, "DB_PASSWORD");
+    update_option<std::string>    (DB_NAME, "DB_NAME");
+    update_option<uint16_t, 10>   (DB_PORT, "DB_PORT");
 }
 
 // getters
