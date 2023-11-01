@@ -73,12 +73,12 @@ void post_json::consume_thread() noexcept{
     while(true){
         int ret_val = 0;
         std::stringstream ss;
-        DBQuery dbq;
  
         nlohmann::json j = m_tsq.pop();
 
         // DeviceID hash CurrentDateTime Temperature Humidity
         if(j.contains("DeviceID") && j.contains("hash") && j.contains("CurrentDateTime") && j.contains("Temperature") && j.contains("Humidity")){
+            DBQuery dbq;
             std::stringstream ssq;
             // Build insert query
             ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
