@@ -42,10 +42,10 @@ void Logging::init(){
 
     // initialize stream to write to all.log
     sink->locked_backend()->add_stream(
-        boost::make_shared<std::ofstream>("all.log"));
+        boost::make_shared<std::ofstream>("queue.log"));
     sink->set_formatter(fmt);
         sink->set_filter(severity >= trace && (         // filter attributes
-        boost::log::expressions::has_attr(tag_attr) && tag_attr == "ALL"));
+        boost::log::expressions::has_attr(tag_attr) && tag_attr == "QUEUE"));
     boost::log::core::get()->add_sink(sink);
     sink->locked_backend()->auto_flush(false);       // sets autoflush; this needs to set to false in prod(true for testing)
 
