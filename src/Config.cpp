@@ -28,17 +28,6 @@ Config::Config(bool debug):
 
 template <typename T>
 void Config::update_option(T& option, const char* env_var){
-    // Check for env var first
-    char* buffer = getenv(env_var);
-    if(buffer != NULL){
-        option = static_cast<T>(getenv(env_var));
-    }
-    else{
-        std::stringstream ss;
-        ss << "Environment variable: " << env_var << " does not exist, now checking settings.json" << std::endl;
-        std::cerr << ss.str();
-    }
-
     // Check settings.json
     std::ifstream ifs;
     ifs.open("./settings.json");
@@ -53,8 +42,19 @@ void Config::update_option(T& option, const char* env_var){
     }
     else{
         std::stringstream ss;
-        ss << "Setting: " << env_var << " does not have environment variable set or not in settings.json" << std::endl;
+        ss << "Setting: " << env_var << " is not set in settings.json" << std::endl;
         //throw ss.str(); 
+    }
+
+    // Check for env var
+    char* buffer = getenv(env_var);
+    if(buffer != NULL){
+        option = static_cast<T>(getenv(env_var));
+    }
+    else{
+        std::stringstream ss;
+        ss << "Environment variable: " << env_var << " does not exist" << std::endl;
+        std::cerr << ss.str();
     }
 }
 
