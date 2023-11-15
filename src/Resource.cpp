@@ -31,7 +31,7 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     headers = req.get_headers();
 
     if(headers["Content-Type"] != "application/json"){
-        m_logger.log_trace(std::string("Post request Content-Type is not application/json"), "GENTRACE");
+        m_logger.log_trace(std::string("Post request Content-Type is not application/json"), "QUEUE");
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
     }
 
@@ -44,13 +44,13 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     if(ret_val == 0){
         std::stringstream ss;
         ss << "Inserting data into queue: " << tmp_j << std::endl;
-        m_logger.log_trace(ss.str(), "GENTRACE");
+        m_logger.log_trace(ss.str(), "QUEUE");
         m_tsq.push(tmp_j);
     }
     else{
         std::stringstream ss;
         ss << "Failed insert json into queue: " << tmp << std::endl;
-        m_logger.log_trace(ss.str(), "GENTRACE");
+        m_logger.log_trace(ss.str(), "QUEUE");
     }
 
     return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val)));
@@ -61,7 +61,7 @@ int post_json::parse_json(std::string json_string, nlohmann::json& json){
 
     if(!nlohmann::json::accept(json_string)){
         ss << "Failed to parse json string: " << json_string << std::endl;
-        m_logger.log_trace(ss.str(), "GENTRACE");
+        m_logger.log_trace(ss.str(), "QUEUE");
         return 1;
     }
 
@@ -88,7 +88,7 @@ void post_json::consume_thread() noexcept{
 
             if(ret_val != 0){
                 ss << "Error inserting json data: " << j;
-                m_logger.log_trace(ss.str(), "GENTRACE");
+                m_logger.log_trace(ss.str(), "QUEUE");
                 ss.str(std::string());
                 ss.clear();
             }
@@ -103,6 +103,6 @@ void post_json::consume_thread() noexcept{
         }
 
         ss << "Queue size reduced by 1 to: " << m_tsq.size();
-        m_logger.log_trace(ss.str(), "GENTRACE");
+        m_logger.log_trace(ss.str(), "QUEUE");
     }
 }
