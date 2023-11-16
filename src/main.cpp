@@ -20,6 +20,9 @@ int main(int argc, char** argv) {
 
     Logging log;
     log.init();
+    std::stringstream ss;
+    ss << "test here" << std::endl;
+    log.log(severity_level, ss, "GENTRACE");
 
     //std::atomic<bool> stop_thread_flag = false;
     //Performance_Monitoring pm(stop_thread_flag);
