@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     log.init();
     std::stringstream ss;
     ss << "test here" << std::endl;
-    log.log(severity_level, ss, "GENTRACE");
+    log.log(severity_level::trace, ss, "GENTRACE");
 
     //std::atomic<bool> stop_thread_flag = false;
     //Performance_Monitoring pm(stop_thread_flag);
