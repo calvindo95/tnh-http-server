@@ -47,7 +47,7 @@ void Logging::init(){
         sink->set_filter(severity >= trace && (         // filter attributes
         boost::log::expressions::has_attr(tag_attr) && tag_attr == "QUEUE"));
     boost::log::core::get()->add_sink(sink);
-    sink->locked_backend()->auto_flush(false);       // sets autoflush; this needs to set to false in prod(true for testing)
+    sink->locked_backend()->auto_flush(true);       // sets autoflush; this needs to set to false in prod(true for testing)
 
     // initialize stream to write to performance.log
     sink = boost::make_shared<text_sink>();
