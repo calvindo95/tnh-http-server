@@ -46,7 +46,7 @@ void Config::update_option(T& option, const char* env_var){
     // Check json if env var doesn't exist
     else{
         ss << "Config: " << env_var << " is not set as an env variable, checking settings.json" << std::endl;
-        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+        m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
         ss.str(std::string());
         ss.clear();
 
@@ -58,7 +58,7 @@ void Config::update_option(T& option, const char* env_var){
         }
         else{
             ss << "Config: " << env_var << " not found in settings.json" << std::endl;
-            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+            m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
         }
     }
 }
@@ -89,7 +89,7 @@ void Config::update_option(T& option, const char* env_var){
         }
         else{
             ss << "Config: " << env_var << " is not set as an env variable, checking settings.json" << std::endl;
-            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+            m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
             ss.str(std::string());
             ss.clear();
 
@@ -105,7 +105,7 @@ void Config::update_option(T& option, const char* env_var){
             }
             else{
                 ss << "Config: " << env_var << " is not set in settings.json, checking Env variables" << std::endl;
-                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+                m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
             }
 
             option = option;
@@ -113,7 +113,7 @@ void Config::update_option(T& option, const char* env_var){
     }
     catch(const char* e){
         ss << "ERROR: " << env_var << " - " << e << " out of bounds" << std::endl;
-        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+        m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
         exit(1);
     }
 }
