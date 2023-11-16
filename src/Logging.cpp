@@ -110,6 +110,15 @@ void Logging::log(severity_level sl, const std::stringstream& msg, const std::st
     BOOST_LOG_SEV(severity_log, sl) << msg.str();
 }
 
+void Logging::log(severity_level sl, const std::string& msg, const std::string& filter){
+    boost::log::sources::severity_logger_mt<severity_level> severity_log;       // need to use _mt to allow multithreading
+    char* buffer = new char[filter.length() +1];
+    std::strcpy(buffer, filter.c_str());
+    
+    BOOST_LOG_SCOPED_THREAD_TAG("Tag", buffer);
+    BOOST_LOG_SEV(severity_log, sl) << msg;
+}
+
 // helper function to make human-readable severity level
 std::ostream& operator<<(std::ostream& strm, Logging::severity_level level)
 {

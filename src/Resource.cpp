@@ -31,7 +31,7 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     headers = req.get_headers();
 
     if(headers["Content-Type"] != "application/json"){
-        m_logger.log_trace(std::string("Post request Content-Type is not application/json"), "QUEUE");
+        m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json"), "GENTRACE");
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
     }
 
@@ -42,15 +42,16 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     ret_val += parse_json(tmp,tmp_j);
 
     if(ret_val == 0){
-        std::stringstream ss;
-        ss << "Inserting data into queue: " << tmp_j << std::endl;
-        m_logger.log_trace(ss.str(), "QUEUE");
         m_tsq.push(tmp_j);
+        std::stringstream ss;
+        //ss << "Inserting data into queue: " << tmp_j << std::endl;
+        ss << "Inserting data into queue. Queue size increased by 1" << std::endl;
+        m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
     }
     else{
         std::stringstream ss;
         ss << "Failed insert json into queue: " << tmp << std::endl;
-        m_logger.log_trace(ss.str(), "QUEUE");
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
     }
 
     return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val)));
@@ -61,7 +62,7 @@ int post_json::parse_json(std::string json_string, nlohmann::json& json){
 
     if(!nlohmann::json::accept(json_string)){
         ss << "Failed to parse json string: " << json_string << std::endl;
-        m_logger.log_trace(ss.str(), "QUEUE");
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
 
@@ -88,7 +89,7 @@ void post_json::consume_thread() noexcept{
 
             if(ret_val != 0){
                 ss << "Error inserting json data: " << j;
-                m_logger.log_trace(ss.str(), "QUEUE");
+                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
                 ss.str(std::string());
                 ss.clear();
             }
@@ -97,12 +98,12 @@ void post_json::consume_thread() noexcept{
         // Application Code PID Text Time UID
         if(j.contains("Application") && j.contains("Code") && j.contains("PID") && j.contains("Text") && j.contains("UID")){
             ss << j.dump() << std::endl;
-            m_logger.log_trace(ss.str(), "EVENT");
+            m_logger.log(Logging::severity_level::trace, ss, "EVENT");
             ss.str(std::string());
             ss.clear();
         }
 
         ss << "Queue size reduced by 1 to: " << m_tsq.size();
-        m_logger.log_trace(ss.str(), "QUEUE");
+        m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
     }
 }
