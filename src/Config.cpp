@@ -45,7 +45,7 @@ void Config::update_option(T& option, const char* env_var){
     }
     // Check json if env var doesn't exist
     else{
-        ss << "Config: " << env_var << " does not exist, checking settings.json" << std::endl;
+        ss << "Config: " << env_var << " is not set as an env variable, checking settings.json" << std::endl;
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         ss.str(std::string());
         ss.clear();
@@ -88,7 +88,7 @@ void Config::update_option(T& option, const char* env_var){
             }
         }
         else{
-            ss << "Config: " << env_var << " does not exist, checking settings.json" << std::endl;
+            ss << "Config: " << env_var << " is not set as an env variable, checking settings.json" << std::endl;
             m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
             ss.str(std::string());
             ss.clear();
