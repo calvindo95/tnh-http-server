@@ -6,12 +6,15 @@
 #include <iostream>
 #include <cstring>
 
+#include <Logging.h>
+
 using json = nlohmann::json;
 
 class Config{
     private:
         Config(bool debug = true);
         bool             DEBUG_FLAG;
+        Logging m_logger;
 
         // Server Configs
         uint16_t         HTTP_PORT;

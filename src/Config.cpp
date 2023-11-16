@@ -37,35 +37,72 @@ void Config::update_option(T& option, const char* env_var){
     if(j.contains(env_var)){
         std::stringstream ss;
         ss << env_var << " found in settings.json with value: " << j.at(env_var) << std::endl;
-        std::cout << ss.str();
+        //std::cout << ss.str();
+        m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
         option = static_cast<T>(j.at(env_var));
     }
     else{
         std::stringstream ss;
-        ss << "Setting: " << env_var << " is not set in settings.json" << std::endl;
+        ss << "Setting: " << env_var << " is not set in settings.json, checking if set as Env variable" << std::endl;
         //throw ss.str(); 
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
     }
 
     // Check for env var
     char* buffer = getenv(env_var);
     if(buffer != NULL){
         option = static_cast<T>(getenv(env_var));
+
+        std::stringstream ss;
+        ss << "Environment variable: " << env_var << "=" << option << " is set as an env variable" << std::endl;
+        m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
     }
     else{
         std::stringstream ss;
         ss << "Environment variable: " << env_var << " does not exist" << std::endl;
-        std::cerr << ss.str();
+        //std::cerr << ss.str();
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
     }
 }
 
 template <typename T, unsigned int base>
 void Config::update_option(T& option, const char* env_var){
+    // Check settings.json
+    std::ifstream ifs;
+    ifs.open("./settings.json");
+
+    json j = json::parse(ifs);
+
+    if(j.contains(env_var)){
+        std::stringstream ss;
+        ss << env_var << " found in settings.json with value: " << j.at(env_var) << std::endl;
+        //std::cout << ss.str();
+        m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
+
+        std::string tmp_str = nlohmann::to_string(j.at(env_var));
+        tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '"'), tmp_str.end());
+
+        const char* buf = tmp_str.c_str();
+        option = static_cast<T>(std::stoul(buf, nullptr, base));
+    }
+    else{
+        std::stringstream ss;
+        ss << "Setting: " << env_var << " is not set in settings.json, checking Env variables" << std::endl;
+        //throw ss.str(); 
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+    }
+
+    // Check env variables for settings; ENV vars take priority
     char* buffer = getenv(env_var);
     try{
         if(buffer != NULL){
             int env_num = std::stoi(buffer);
             if(env_num > 0 && env_num < 65536){
                 option = static_cast<T>(std::stoul(buffer, nullptr, base));
+                
+                std::stringstream ss;
+                ss << "Environment variable: " << env_var << "=" << option << " is set as an env variable" << std::endl;
+                m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
             }
             else{
                 throw(buffer);
@@ -76,32 +113,10 @@ void Config::update_option(T& option, const char* env_var){
         }
     }
     catch(const char* e){
-        std::cout << "ERROR: " << env_var << " - " << e << " out of bounds" << std::endl;
+        std::stringstream ss;
+        ss << "ERROR: " << env_var << " - " << e << " out of bounds" << std::endl;
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         exit(1);
-    }
-
-    // Check settings.json
-    std::ifstream ifs;
-    ifs.open("./settings.json");
-
-    json j = json::parse(ifs);
-
-    if(j.contains(env_var)){
-        std::stringstream ss;
-        ss << env_var << " found in settings.json with value: " << j.at(env_var) << std::endl;
-        std::cout << ss.str();
-
-        std::string tmp_str = nlohmann::to_string(j.at(env_var));
-        tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '"'), tmp_str.end());
-
-        const char* buf = tmp_str.c_str();
-        option = static_cast<T>(std::stoul(buf, nullptr, base));
-        std::cout << "here" << std::endl;
-    }
-    else{
-        std::stringstream ss;
-        ss << "Setting: " << env_var << " does not have environment variable set or not in settings.json" << std::endl;
-        //throw ss.str(); 
     }
 }
 

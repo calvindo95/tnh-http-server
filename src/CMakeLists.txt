@@ -3,6 +3,7 @@ include_directories(/usr/include/mariadb)
 find_library(mariadb NAMES mariadb PATHS /usr/lib/arm-linux-gnueabihf)
 
 add_library(config STATIC Config.cpp)
+target_link_libraries(config logging)
 
 add_library(dbquery STATIC DBQuery.cpp)
 target_link_libraries(dbquery mariadb)
