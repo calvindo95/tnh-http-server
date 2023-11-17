@@ -7,7 +7,7 @@
 DBQuery::DBQuery(){
     MYSQL *conn;
     if (!(conn = mysql_init(0))){
-        m_logger.log_trace("Unable to initialize connection", "GENTRACE");
+        m_logger.log(Logging::severity_level::warning, std::string("Unable to initialize connection", "GENTRACE"), "GENTRACE");
     }
     else{
         m_conn = conn;
@@ -25,7 +25,7 @@ DBQuery::DBQuery(){
     )){
         std::stringstream ss;
         ss << "Error connecting to db server: " << mysql_error(m_conn);
-        m_logger.log_trace(ss.str(), "GENTRACE");
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         mysql_close(m_conn);
     }
 }
@@ -38,14 +38,14 @@ void DBQuery::query(std::string query){
     // test connection here
 
     if(mysql_query(m_conn, query.c_str())){
-        m_logger.log_trace("Error running query", "GENTRACE");
+        m_logger.log(Logging::severity_level::warning, std::string("Error running query"), "GENTRACE");
     }
 
     MYSQL_RES *result = mysql_store_result(m_conn);
 
     if (result == NULL)
     {
-        m_logger.log_trace("Error storing query result", "GENTRACE");
+        m_logger.log(Logging::severity_level::warning, std::string("Error storing query result"), "GENTRACE");
     }
 
 
@@ -72,7 +72,7 @@ int DBQuery::insert(std::string query){
     if(mysql_query(m_conn, query.c_str())){
         std::stringstream ss;
         ss << "Error running query: " << query;
-        m_logger.log_trace(ss.str(), "GENTRACE");
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
     
