@@ -44,8 +44,7 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     if(ret_val == 0){
         m_tsq.push(tmp_j);
         std::stringstream ss;
-        //ss << "Inserting data into queue: " << tmp_j << std::endl;
-        ss << "Inserting data into queue. Queue size increased by 1" << std::endl;
+        ss << "Inserting data into queue: " << tmp_j << std::endl;
         m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
     }
     else{
