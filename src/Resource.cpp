@@ -98,7 +98,6 @@ void post_json::consume_thread() noexcept{
         if(j.contains("Application") && j.contains("IP") && j.contains("Text") && j.contains("UID")){
             ss << j.dump() << std::endl;
             m_logger.log(Logging::severity_level::trace, ss, "EVENT");
-            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
             ss.str(std::string());
             ss.clear();
         }
