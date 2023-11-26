@@ -21,5 +21,6 @@ then
 
     sh scripts/spinup.sh tnh-server-arm 8081 tnh-server $1
 else
-    echo "tnh-base-arm img does not exist"
+    echo "tnh-base-arm img does not exist, building base img"
+    sh scripts/build_img.sh scripts/Dockerfile_arm_base tnh-base-arm
 fi
