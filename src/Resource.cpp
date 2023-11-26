@@ -95,7 +95,7 @@ void post_json::consume_thread() noexcept{
         }
 
         // Application Code PID Text Time UID
-        if(j.contains("Application") && j.contains("IP") && j.contains("Text") && j.contains("UID")){
+        if(j.contains("Application") && j.contains("Dev_ID") && j.contains("Text") && j.contains("UID")){
             ss << j.dump() << std::endl;
             m_logger.log(Logging::severity_level::trace, ss, "EVENT");
             ss.str(std::string());
