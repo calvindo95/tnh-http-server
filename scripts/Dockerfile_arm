@@ -1,7 +1,13 @@
 FROM tnh-base-arm
 
 ENV HOME=/home/webserver
+ENV TNH_LOG=/var/opt/tnh-server
+
 RUN useradd -ms /bin/bash webserver
+
+RUN mkdir -p $TNH_LOG 
+RUN chown webserver:webserver $TNH_LOG
+
 WORKDIR /home/webserver
 
 RUN git clone -b test https://github.com/calvindo95/tnh-http-server.git && \
@@ -11,5 +17,5 @@ RUN git clone -b test https://github.com/calvindo95/tnh-http-server.git && \
     cmake --build . -j4 --target install
 
 USER webserver
-
+WORKDIR /home/webserver/tnh-http-server
 CMD ["/home/webserver/tnh-http-server/scripts/run_server.sh"]
