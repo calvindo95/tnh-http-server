@@ -32,6 +32,8 @@ class Config{
         std::string      DB_NAME;
         uint16_t         DB_PORT;
 
+        std::string      TNH_SETTINGS_JSON;
+
         template <typename T>
         void update_option(T& option, const char* env_var);
 
@@ -54,4 +56,6 @@ class Config{
         std::string      GET_DB_PASSWORD();
         std::string      GET_DB_NAME();
         uint16_t         GET_DB_PORT();
+
+        std::string      GET_TNH_SETTINGS_JSON();
 };

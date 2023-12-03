@@ -28,13 +28,6 @@ Config::Config(bool debug):
 
 template <typename T>
 void Config::update_option(T& option, const char* env_var){
-    // Check settings.json
-    std::ifstream ifs;
-    ifs.open("./settings.json");
-
-    json j = json::parse(ifs);
-    std::stringstream ss;
-
     // Check for env var
     char* buffer = getenv(env_var);
     if(buffer != NULL){
@@ -50,6 +43,12 @@ void Config::update_option(T& option, const char* env_var){
         ss.str(std::string());
         ss.clear();
 
+        // Check settings.json
+        std::ifstream ifs;
+        ifs.open(GET_TNH_SETTINGS_JSON().c_str());
+
+        json j = json::parse(ifs);
+        std::stringstream ss;
 
         if(j.contains(env_var)){
             ss << "Config: " << env_var << " found in settings.json" << std::endl;
@@ -65,13 +64,6 @@ void Config::update_option(T& option, const char* env_var){
 
 template <typename T, unsigned int base>
 void Config::update_option(T& option, const char* env_var){
-    // Check settings.json
-    std::ifstream ifs;
-    ifs.open("./settings.json");
-
-    json j = json::parse(ifs);
-    std::stringstream ss;
-
     // Check env variables for settings; ENV vars take priority
     char* buffer = getenv(env_var);
     try{
@@ -92,6 +84,13 @@ void Config::update_option(T& option, const char* env_var){
             m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
             ss.str(std::string());
             ss.clear();
+
+            // Check settings.json
+            std::ifstream ifs;
+            ifs.open(GET_TNH_SETTINGS_JSON().c_str());
+
+            json j = json::parse(ifs);
+            std::stringstream ss;
 
             if(j.contains(env_var)){
                 ss << "Config: " << env_var << " found in settings.json" << std::endl;
@@ -124,8 +123,8 @@ Config& Config::get_instance(bool debug){
 }
 // #### PUBLIC METHODS START HERE #### //
 
-// this should only ever be used for testing purposes outside of the class
 void Config::update_config(){
+    update_option<std::string>    (TNH_SETTINGS_JSON, "TNH_SETTINGS_JSON");
     update_option<uint16_t, 10>   (HTTP_PORT, "HTTP_PORT");
     update_option<std::string>    (HTTPS_MEM_KEY, "HTTPS_MEM_KEY_PATH");
     update_option<std::string>    (HTTPS_MEM_CERT, "HTTPS_MEM_CERT_PATH");
@@ -176,4 +175,7 @@ std::string Config::GET_DB_NAME(){
 }
 uint16_t    Config::GET_DB_PORT(){
     return DB_PORT;
+}
+std::string Config::GET_TNH_SETTINGS_JSON(){
+    return TNH_SETTINGS_JSON;
 }

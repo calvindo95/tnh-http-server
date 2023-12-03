@@ -1,7 +1,10 @@
 FROM tnh-base-arm
 
 ENV HOME=/home/webserver
+ENV TNH_HOME=$HOME/tnh-http-server
+ENV TNH_SETTINGS_JSON=$TNH_HOME/settings.json
 ENV TNH_LOG=/var/opt/tnh-server
+ENV TNH_EXEC=/usr/local/bin/tnh-server
 
 RUN useradd -ms /bin/bash webserver
 
