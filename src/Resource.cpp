@@ -70,8 +70,8 @@ int post_json::parse_json(std::string json_string, nlohmann::json& json){
 }
 
 void post_json::consume_thread() noexcept{
-    DBQuery dbq;
     while(true){
+        DBQuery dbq;
         int ret_val = 0;
         std::stringstream ss;
  
