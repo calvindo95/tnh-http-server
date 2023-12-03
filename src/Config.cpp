@@ -28,6 +28,8 @@ Config::Config(bool debug):
 
 template <typename T>
 void Config::update_option(T& option, const char* env_var){
+    std::stringstream ss;
+
     // Check for env var
     char* buffer = getenv(env_var);
     if(buffer != NULL){
@@ -48,7 +50,6 @@ void Config::update_option(T& option, const char* env_var){
         ifs.open(GET_TNH_SETTINGS_JSON().c_str());
 
         json j = json::parse(ifs);
-        std::stringstream ss;
 
         if(j.contains(env_var)){
             ss << "Config: " << env_var << " found in settings.json" << std::endl;
@@ -64,6 +65,8 @@ void Config::update_option(T& option, const char* env_var){
 
 template <typename T, unsigned int base>
 void Config::update_option(T& option, const char* env_var){
+    std::stringstream ss;
+    
     // Check env variables for settings; ENV vars take priority
     char* buffer = getenv(env_var);
     try{
@@ -90,7 +93,6 @@ void Config::update_option(T& option, const char* env_var){
             ifs.open(GET_TNH_SETTINGS_JSON().c_str());
 
             json j = json::parse(ifs);
-            std::stringstream ss;
 
             if(j.contains(env_var)){
                 ss << "Config: " << env_var << " found in settings.json" << std::endl;
