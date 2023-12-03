@@ -1,9 +1,9 @@
 #!/bin/sh
 
-if [ -f ./build/src/tnh-server ];
+if [ -f /usr/local/bin/tnh-server ];
 then
-    ./build/src/tnh-server
+    /usr/local/bin/tnh-server
 else
-    echo "./build/src/tnh-server not found"
+    echo "/usr/local/bin/tnh-server not found"
     exit
 fi
