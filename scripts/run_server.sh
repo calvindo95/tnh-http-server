@@ -1,9 +1,9 @@
 #!/bin/sh
 
-if [ -f /usr/local/bin/tnh-server ];
+if [ -f $TNH_EXEC ];
 then
-    /usr/local/bin/tnh-server
+    $TNH_EXEC
 else
-    echo "/usr/local/bin/tnh-server not found"
+    echo "$TNH_EXEC not found"
     exit
 fi
