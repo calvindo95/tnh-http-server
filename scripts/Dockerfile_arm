@@ -1,11 +1,15 @@
 FROM tnh-base-arm
 
+ENV HOME=/home/webserver
+RUN useradd -ms /bin/bash webserver
+WORKDIR /home/webserver
+
 RUN git clone -b test https://github.com/calvindo95/tnh-http-server.git && \
     cd tnh-http-server/include && wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp && cd .. && \
     mkdir build && cd build && \
     cmake .. && \
-    cmake --build . -j4
+    cmake --build . -j4 --target install
 
-WORKDIR /home/webserver/tnh-http-server
+USER webserver
 
 CMD ["/home/webserver/tnh-http-server/scripts/run_server.sh"]

@@ -29,9 +29,3 @@ RUN cd /tmp && \
 
 # set env variables otherwise libhttpserver doesn't work
 ENV LD_LIBRARY_PATH=/usr/local/lib
-
-# set user; everything below is under user webserver
-ENV HOME=/home/webserver
-RUN useradd -ms /bin/bash webserver
-USER webserver
-WORKDIR /home/webserver
