@@ -75,7 +75,7 @@ void Logging::init(){
 
     // initialize stream to write to event.log
     std::stringstream sse;
-    ssg << GET_TNH_LOG().c_str() << "/event.log";
+    sse << GET_TNH_LOG().c_str() << "/event.log";
     sink = boost::make_shared<text_sink>();
     sink->locked_backend()->add_stream(
         boost::make_shared<std::ofstream>(sse.str()));
