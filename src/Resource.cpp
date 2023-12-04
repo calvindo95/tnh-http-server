@@ -104,7 +104,7 @@ void post_json::consume_thread() noexcept{
             // insert into EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) select 4,AppTbl.AppID,"2023-12-03 14:38:04","Test Event text" from AppTbl where AppName='TEST';
 
             std::stringstream ssq;
-            ssq << "INSERT INTO EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) SELECT " << j["Dev_ID"] << ",AppTbl.AppID," << j["Time"] << "," << j["Text"] << " FROM ApplTbl WHERE AppName =" << j["Application"] << ";";
+            ssq << "INSERT INTO EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) SELECT " << j["Dev_ID"] << ",AppTbl.AppID," << j["Time"] << "," << j["Text"] << " FROM AppTbl WHERE AppName =" << j["Application"] << ";";
 
             ret_val += dbq.insert(ssq.str());
 
