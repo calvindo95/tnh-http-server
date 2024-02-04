@@ -35,7 +35,7 @@ void Config::update_option(T& option, const char* env_var){
     if(buffer != NULL){
         option = static_cast<T>(getenv(env_var));
 
-        ss << "Config: " << env_var << " is set as an env variable" << std::endl;
+        ss << "Config: " << env_var << " is set as an env variable, skipping json check" << std::endl;
         m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
     }
     // Check json if env var doesn't exist
