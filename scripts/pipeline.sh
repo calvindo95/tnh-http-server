@@ -19,7 +19,8 @@ then
 
     yes | docker container prune
 
-    sh scripts/spinup.sh tnh-server-arm 8081 tnh-server $1
+    # Usage: 'sh spinup.sh <image name>' <port> <container name> <DB_USERNAME> <DB_PASSWORD>
+    sh scripts/spinup.sh tnh-server-arm 8081 tnh-server tnh_server $1
 else
     echo "tnh-base-arm img does not exist, building base img"
     sh scripts/build_img.sh scripts/Dockerfile_arm_base tnh-base-arm
