@@ -4,8 +4,7 @@ if [ $# -lt 1 ]; then # checks if number of arguments is less than 2
     return 1
 fi
 
-if $(docker image ls | grep -q tnh-base-arm)
-then
+build_main_img () {
     echo "tnh-base-arm img exists, building tnh-server-arm img"
     sh scripts/build_img.sh scripts/Dockerfile_arm tnh-server-arm
 
@@ -21,7 +20,14 @@ then
 
     # Usage: 'sh spinup.sh <image name>' <port> <container name> <DB_USERNAME> <DB_PASSWORD>
     sh scripts/spinup.sh tnh-server-arm 8081 tnh-server tnh_server $1
+}
+
+if $(docker image ls | grep -q tnh-base-arm)
+then
+    build_main_img
 else
     echo "tnh-base-arm img does not exist, building base img"
     sh scripts/build_img.sh scripts/Dockerfile_arm_base tnh-base-arm
+
+    build_main_img
 fi
