@@ -8,13 +8,13 @@ else
     exit
 fi
 
-if [ -f $EGS_EXEC ];
-then
-    $EGS_EXEC &
-else
-    echo "$EGS_EXEC not found"
-    exit
-fi
+#if [ -f $EGS_EXEC ];
+#then
+#    $EGS_EXEC &
+#else
+#    echo "$EGS_EXEC not found"
+#    exit
+#fi
 
 # Wait for any processes to exit
 wait -n
