@@ -17,7 +17,7 @@ fi
 #fi
 
 # Wait for any processes to exit
-wait -n
+wait
 
 # Exit with process exit code
 exit $?
