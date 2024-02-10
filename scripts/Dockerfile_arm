@@ -1,5 +1,7 @@
 FROM tnh-base-arm
 
+########## START ROOT ##########
+
 ENV HOME=/home/webserver
 ENV TNH_HOME=$HOME/tnh-http-server
 ENV TNH_SETTINGS_JSON=$TNH_HOME/settings.json
@@ -19,8 +21,16 @@ RUN git clone -b test https://github.com/calvindo95/tnh-http-server.git && \
     cmake .. && \
     cmake --build . -j4 --target install
 
-RUN chown webserver:webserver /home/webserver/tnh-http-server/settings.json
+COPY --chown=webserver:webserver settings.json $TNH_SETTINGS_JSON
+
+########## END ROOT ##########
+
+
+
+########## START WEBSERVER ##########
 
 USER webserver
 WORKDIR /home/webserver/tnh-http-server
 CMD ["/home/webserver/tnh-http-server/scripts/run_server.sh"]
+
+########## END WEBSERVER ##########
