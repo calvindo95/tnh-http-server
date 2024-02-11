@@ -7,7 +7,7 @@ RUN useradd -ms /bin/bash webserver
 ENV HOME=/home/webserver
 
 ENV TNH_HOME=$HOME/tnh-http-server
-ENV TNH_SETTINGS_JSON=$TNH_HOME/settings.json
+ENV TNH_SETTINGS_JSON=$TNH_HOME/tnh_settings.json
 ENV TNH_LOG=/var/opt/tnh-server
 ENV TNH_EXEC=/usr/local/bin/tnh-server
 
@@ -21,13 +21,13 @@ RUN git clone -b test https://github.com/calvindo95/tnh-http-server.git && \
     cmake .. && \
     cmake --build . -j4 --target install
 
-COPY --chown=webserver:webserver settings.json $TNH_SETTINGS_JSON
+COPY --chown=webserver:webserver tnh_settings.json $TNH_SETTINGS_JSON
 
 
 
 ENV EGCS_HOME=/home/webserver/eg-cs
 ENV EGS_EXEC=/usr/local/bin/egs
-ENV EGCS_SETTINGS_JSON=$EGCS_HOME/settings.json
+ENV EGCS_SETTINGS_JSON=$EGCS_HOME/egcs_settings.json
 ENV EGCS_LOG=/var/opt/egcs
 ENV EVENT_DIR=$EGCS_LOG/queue/
 
@@ -41,7 +41,7 @@ RUN git clone -b test https://github.com/calvindo95/eg-cs.git && \
     cmake .. && \
     cmake --build . -j4 --target install
 
-COPY --chown=webserver:webserver settings.json $EGCS_SETTINGS_JSON
+COPY --chown=webserver:webserver egcs_settings.json $EGCS_SETTINGS_JSON
 
 ########## END ROOT ##########
 
