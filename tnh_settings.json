@@ -7,8 +7,8 @@
     "CONNECTION_TIMEOUT": "120",
     "MEMORY_LIMIT": "65535",
     "MAX_THREADS": "8",
-    "DB_IP": "192.168.1.174",
-    "DB_USERNAME": "admin",
+    "DB_IP": "192.168.1.236",
+    "DB_USERNAME": "tnh_server",
     "DB_PASSWORD": "null",
     "DB_NAME": "humidity_tracker",
     "DB_PORT": "3306"

@@ -1,11 +1,11 @@
-if [ $# -lt 1 ]; then # checks if number of arguments is less than 2
+if [ $# -lt 0 ]; then # checks if number of arguments is less than 2
     echo "Less than 1 arguments were supplied"
-    echo "Usage: 'sh pipeine.sh <DB_PASSWORD>"
+    echo "Usage: 'sh pipeine.sh"
     return 1
 fi
 
-if $(docker image ls | grep -q tnh-base-arm)
-then
+
+build_main_img () {
     echo "tnh-base-arm img exists, building tnh-server-arm img"
     sh scripts/build_img.sh scripts/Dockerfile_arm tnh-server-arm
 
@@ -19,7 +19,16 @@ then
 
     yes | docker container prune
 
-    sh scripts/spinup.sh tnh-server-arm 8081 tnh-server $1
+    # Usage: 'sh spinup.sh <image name>' <port> <container name>
+    sh scripts/spinup.sh tnh-server-arm 8081 tnh-server
+}
+
+if $(docker image ls | grep -q tnh-base-arm)
+then
+    build_main_img
 else
-    echo "tnh-base-arm img does not exist"
+    echo "tnh-base-arm img does not exist, building base img"
+    sh scripts/build_img.sh scripts/Dockerfile_arm_base tnh-base-arm
+
+    build_main_img
 fi

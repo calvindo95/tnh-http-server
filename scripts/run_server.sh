@@ -1,9 +1,23 @@
 #!/bin/sh
 
-if [ -f ./build/src/tnh-server ];
+if [ -f $TNH_EXEC ];
 then
-    ./build/src/tnh-server
+    $TNH_EXEC &
 else
-    echo "./build/src/tnh-server not found"
+    echo "$TNH_EXEC not found"
     exit
 fi
+
+if [ -f $EGS_EXEC ];
+then
+    $EGS_EXEC &
+else
+    echo "$EGS_EXEC not found"
+    exit
+fi
+
+# Wait for any processes to exit
+wait
+
+# Exit with process exit code
+exit $?

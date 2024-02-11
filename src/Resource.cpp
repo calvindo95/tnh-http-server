@@ -44,8 +44,7 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     if(ret_val == 0){
         m_tsq.push(tmp_j);
         std::stringstream ss;
-        //ss << "Inserting data into queue: " << tmp_j << std::endl;
-        ss << "Inserting data into queue. Queue size increased by 1" << std::endl;
+        ss << "Inserting data into queue: " << tmp_j << std::endl;
         m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
     }
     else{
@@ -72,6 +71,7 @@ int post_json::parse_json(std::string json_string, nlohmann::json& json){
 
 void post_json::consume_thread() noexcept{
     while(true){
+        DBQuery dbq;
         int ret_val = 0;
         std::stringstream ss;
  
@@ -79,7 +79,6 @@ void post_json::consume_thread() noexcept{
 
         // DeviceID hash CurrentDateTime Temperature Humidity
         if(j.contains("DeviceID") && j.contains("hash") && j.contains("CurrentDateTime") && j.contains("Temperature") && j.contains("Humidity")){
-            DBQuery dbq;
             std::stringstream ssq;
             // Build insert query
             ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
@@ -96,11 +95,25 @@ void post_json::consume_thread() noexcept{
         }
 
         // Application Code PID Text Time UID
-        if(j.contains("Application") && j.contains("Code") && j.contains("PID") && j.contains("Text") && j.contains("UID")){
+        if(j.contains("Application") && j.contains("Dev_ID") && j.contains("Text") && j.contains("UID")){
             ss << j.dump() << std::endl;
             m_logger.log(Logging::severity_level::trace, ss, "EVENT");
             ss.str(std::string());
             ss.clear();
+
+            // insert into EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) select 4,AppTbl.AppID,"2023-12-03 14:38:04","Test Event text" from AppTbl where AppName='TEST';
+
+            std::stringstream ssq;
+            ssq << "INSERT INTO EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) SELECT " << j["Dev_ID"] << ",AppTbl.AppID," << j["Time"] << "," << j["Text"] << " FROM AppTbl WHERE AppName =" << j["Application"] << ";";
+
+            ret_val += dbq.insert(ssq.str());
+
+            if(ret_val != 0){
+                ss << "Error inserting json data: " << j;
+                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+                ss.str(std::string());
+                ss.clear();
+            }
         }
 
         ss << "Queue size reduced by 1 to: " << m_tsq.size();

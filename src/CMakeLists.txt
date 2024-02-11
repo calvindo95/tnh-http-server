@@ -17,4 +17,4 @@ target_link_libraries(resource logging dbquery)
 add_executable(${TARGET} main.cpp)
 target_link_libraries(${TARGET} httpserver microhttpd config resource)
 
-install(TARGETS ${TARGET})
+install(TARGETS ${TARGET} DESTINATION /usr/local/bin)
