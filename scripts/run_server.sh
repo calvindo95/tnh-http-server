@@ -1,27 +1,23 @@
 #!/bin/sh
 
-# START SERVER OPTIONS
-export HTTP_PORT=8082
-export MAX_CONNECTIONS=128
-export CONNECTION_TIMEOUT=120
-export MEMORY_LIMIT=65535
-export MAX_THREADS=8
-# END SERVER OPTIONS
-
-# START DB SERVER SETTINGS
-export DB_IP=192.168.1.174
-export DB_USERNAME=admin
-export DB_PASSWORD=Strawb3rries
-export DB_NAME=humidity_tracker
-export DB_PORT=3306
-# END DB SERVER SETTINGS
-
-cd /home/webserver/source_directory
-
-if [ -f ./build/src/server ];
+if [ -f $TNH_EXEC ];
 then
-    ./build/src/tnh-server
+    $TNH_EXEC &
 else
-    echo "./build/src/server not found"
+    echo "$TNH_EXEC not found"
     exit
 fi
+
+if [ -f $EGS_EXEC ];
+then
+    $EGS_EXEC &
+else
+    echo "$EGS_EXEC not found"
+    exit
+fi
+
+# Wait for any processes to exit
+wait
+
+# Exit with process exit code
+exit $?

@@ -1,0 +1,31 @@
+FROM balenalib/raspberrypi3:bullseye
+
+# Update apt repos
+RUN --mount=type=cache,target=/var/cache/apt apt update --allow-unauthenticated && apt upgrade -y
+
+# Install packages
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends libmicrohttpd-dev
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends git
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends curl wget
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends libtool libcurl4-openssl-dev
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends cmake make automake
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends g++ clang
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends libboost-dev libboost-all-dev
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends libmariadb-dev
+#RUN apt -y install nlohmann-json-dev
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends vim
+
+# install libhttpserver
+RUN cd /tmp && \
+    git clone https://github.com/etr/libhttpserver.git && \
+    cd libhttpserver && \
+    ./bootstrap && \
+    mkdir build && \
+    cd build && \
+    ../configure && \
+    make -j4 && \
+    make install && \
+    ldconfig -v
+
+# set env variables otherwise libhttpserver doesn't work
+ENV LD_LIBRARY_PATH=/usr/local/lib

@@ -9,5 +9,5 @@ apt -y install libboost-all-dev
 #make -j4 && \
 #make install
 
-cd ~/source_directory/
-cp service/tnh-server.service /etc/systemd/system/
+#cd ~/source_directory/
+#cp service/tnh-server.service /etc/systemd/system/

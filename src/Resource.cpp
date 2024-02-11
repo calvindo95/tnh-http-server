@@ -25,14 +25,13 @@ post_json::post_json(){
 
 std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::http_request& req) {
     int ret_val = 0; 
-    std::stringstream ss;
     nlohmann::json tmp_j;
     
     std::map<std::string_view, std::string_view, httpserver::http::header_comparator> headers;
     headers = req.get_headers();
 
     if(headers["Content-Type"] != "application/json"){
-        m_logger.log_trace(std::string("Post request Content-Type is not application/json"), "GENTRACE");
+        m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json"), "GENTRACE");
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
     }
 
@@ -43,9 +42,15 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     ret_val += parse_json(tmp,tmp_j);
 
     if(ret_val == 0){
-        ss << "Inserting data into queue: " << tmp_j;
-        m_logger.log_trace(ss.str(), "GENTRACE");
         m_tsq.push(tmp_j);
+        std::stringstream ss;
+        ss << "Inserting data into queue: " << tmp_j << std::endl;
+        m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
+    }
+    else{
+        std::stringstream ss;
+        ss << "Failed insert json into queue: " << tmp << std::endl;
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
     }
 
     return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val)));
@@ -53,48 +58,65 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
 
 int post_json::parse_json(std::string json_string, nlohmann::json& json){
     std::stringstream ss;
-    json = nlohmann::json::parse(json_string);
 
-    // Check if json has correct number of key/values
-    if(json.size() != 5){
-        m_logger.log_trace("Input json does not have correct size(5)", "GENTRACE");
+    if(!nlohmann::json::accept(json_string)){
+        ss << "Failed to parse json string: " << json_string << std::endl;
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
 
-    // Check if correct keys
-    for(int i = 0; i < m_json_keys.size(); i++){
-        if(json.count(m_json_keys[i]) != 1){
-            ss << "JSON key value: '" << m_json_keys[i] << "' is not present in post json";
-            m_logger.log_trace(ss.str(), "GENTRACE");
-            return 1;
-        }
-    }
+    json = nlohmann::json::parse(json_string);
     return 0;
 }
 
 void post_json::consume_thread() noexcept{
     while(true){
+        DBQuery dbq;
         int ret_val = 0;
         std::stringstream ss;
-        std::stringstream ssq;
-        DBQuery dbq;
  
         nlohmann::json j = m_tsq.pop();
 
-        // Build insert query
-        ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
-                INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
+        // DeviceID hash CurrentDateTime Temperature Humidity
+        if(j.contains("DeviceID") && j.contains("hash") && j.contains("CurrentDateTime") && j.contains("Temperature") && j.contains("Humidity")){
+            std::stringstream ssq;
+            // Build insert query
+            ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
+            INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
-        ret_val += dbq.insert(ssq.str());
+            ret_val += dbq.insert(ssq.str());
 
-        if(ret_val != 0){
-            ss << "Error inserting json data: " << j;
-            m_logger.log_trace(ss.str(), "GENTRACE");
-            ss.clear();
+            if(ret_val != 0){
+                ss << "Error inserting json data: " << j;
+                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+                ss.str(std::string());
+                ss.clear();
+            }
+        }
+
+        // Application Code PID Text Time UID
+        if(j.contains("Application") && j.contains("Dev_ID") && j.contains("Text") && j.contains("UID")){
+            ss << j.dump() << std::endl;
+            m_logger.log(Logging::severity_level::trace, ss, "EVENT");
             ss.str(std::string());
+            ss.clear();
+
+            // insert into EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) select 4,AppTbl.AppID,"2023-12-03 14:38:04","Test Event text" from AppTbl where AppName='TEST';
+
+            std::stringstream ssq;
+            ssq << "INSERT INTO EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) SELECT " << j["Dev_ID"] << ",AppTbl.AppID," << j["Time"] << "," << j["Text"] << " FROM AppTbl WHERE AppName =" << j["Application"] << ";";
+
+            ret_val += dbq.insert(ssq.str());
+
+            if(ret_val != 0){
+                ss << "Error inserting json data: " << j;
+                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+                ss.str(std::string());
+                ss.clear();
+            }
         }
 
         ss << "Queue size reduced by 1 to: " << m_tsq.size();
-        m_logger.log_trace(ss.str(), "GENTRACE");
+        m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
     }
 }

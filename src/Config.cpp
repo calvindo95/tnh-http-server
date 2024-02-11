@@ -1,7 +1,4 @@
 #include "Config.h"
-#include <thread>
-#include <iostream>
-#include <cstring>
 
 Config::Config(bool debug): 
     DEBUG_FLAG(debug),
@@ -30,35 +27,94 @@ Config::Config(bool debug):
 }
 
 template <typename T>
-T Config::update_option(T& option, const char* env_var){
+void Config::update_option(T& option, const char* env_var){
+    std::stringstream ss;
+
+    // Check for env var
     char* buffer = getenv(env_var);
     if(buffer != NULL){
-        return static_cast<T>(getenv(env_var));
+        option = static_cast<T>(getenv(env_var));
+
+        ss << "Config: " << env_var << " is set as an env variable, skipping json check" << std::endl;
+        m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
     }
+    // Check json if env var doesn't exist
     else{
-        return option;
+        ss << "Config: " << env_var << " is not set as an env variable, checking settings.json" << std::endl;
+        m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
+        ss.str(std::string());
+        ss.clear();
+
+        // Check settings.json
+        std::ifstream ifs;
+        ifs.open(GET_TNH_SETTINGS_JSON().c_str());
+
+        json j = json::parse(ifs);
+
+        if(j.contains(env_var)){
+            ss << "Config: " << env_var << " found in settings.json" << std::endl;
+            m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
+            option = static_cast<T>(j.at(env_var));
+        }
+        else{
+            ss << "Config: " << env_var << " not found in settings.json" << std::endl;
+            m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
+        }
     }
 }
 
 template <typename T, unsigned int base>
-T Config::update_option(T& option, const char* env_var){
+void Config::update_option(T& option, const char* env_var){
+    std::stringstream ss;
+    
+    // Check env variables for settings; ENV vars take priority
     char* buffer = getenv(env_var);
     try{
         if(buffer != NULL){
             int env_num = std::stoi(buffer);
             if(env_num > 0 && env_num < 65536){
-                return static_cast<T>(std::stoul(buffer, nullptr, base));
+                option = static_cast<T>(std::stoul(buffer, nullptr, base));
+                
+                ss << "Config: " << env_var << " is set as an env variable" << std::endl;
+                m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
             }
             else{
                 throw(buffer);
             }
         }
         else{
-            return option;
+            ss << "Config: " << env_var << " is not set as an env variable, checking settings.json" << std::endl;
+            m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
+            ss.str(std::string());
+            ss.clear();
+
+            // Check settings.json
+            std::ifstream ifs;
+            ifs.open(GET_TNH_SETTINGS_JSON().c_str());
+
+            json j = json::parse(ifs);
+
+            if(j.contains(env_var)){
+                ss << "Config: " << env_var << " found in settings.json" << std::endl;
+                m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
+
+                std::string tmp_str = nlohmann::to_string(j.at(env_var));
+                tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '"'), tmp_str.end());
+
+                const char* buf = tmp_str.c_str();
+                option = static_cast<T>(std::stoul(buf, nullptr, base));
+            }
+            else{
+                ss << "Config: " << env_var << " is not set in settings.json, checking Env variables" << std::endl;
+                m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
+            }
+
+            option = option;
         }
     }
     catch(const char* e){
-        std::cout << "ERROR: " << env_var << " - " << e << " out of bounds" << std::endl;
+        ss << "ERROR: " << env_var << " - " << e << " out of bounds" << std::endl;
+        m_logger.log(Logging::severity_level::normal, ss, "GENTRACE");
         exit(1);
     }
 }
@@ -69,20 +125,20 @@ Config& Config::get_instance(bool debug){
 }
 // #### PUBLIC METHODS START HERE #### //
 
-// this should only ever be used for testing purposes outside of the class
 void Config::update_config(){
-    HTTP_PORT           = update_option<uint16_t, 10>   (HTTP_PORT, "HTTP_PORT");
-    HTTPS_MEM_KEY       = update_option<std::string>    (HTTPS_MEM_KEY, "HTTPS_MEM_KEY_PATH");
-    HTTPS_MEM_CERT      = update_option<std::string>    (HTTPS_MEM_CERT, "HTTPS_MEM_CERT_PATH");
-    MAX_CONNECTIONS     = update_option<uint16_t, 10>   (MAX_CONNECTIONS, "MAX_CONNECTIONS");
-    CONNECTION_TIMEOUT  = update_option<uint16_t, 10>   (CONNECTION_TIMEOUT, "CONNECTION_TIMEOUT");
-    MEMORY_LIMIT        = update_option<uint16_t, 10>   (MEMORY_LIMIT, "MEMORY_LIMIT");
-    MAX_THREADS         = update_option<uint16_t, 10>   (MAX_THREADS, "MAX_THREADS");
-    DB_IP               = update_option<std::string>    (DB_IP, "DB_IP");
-    DB_USERNAME         = update_option<std::string>    (DB_USERNAME, "DB_USERNAME");
-    DB_PASSWORD         = update_option<std::string>    (DB_PASSWORD, "DB_PASSWORD");
-    DB_NAME             = update_option<std::string>    (DB_NAME, "DB_NAME");
-    DB_PORT             = update_option<uint16_t, 10>   (DB_PORT, "DB_PORT");
+    update_option<std::string>    (TNH_SETTINGS_JSON, "TNH_SETTINGS_JSON");
+    update_option<uint16_t, 10>   (HTTP_PORT, "HTTP_PORT");
+    update_option<std::string>    (HTTPS_MEM_KEY, "HTTPS_MEM_KEY_PATH");
+    update_option<std::string>    (HTTPS_MEM_CERT, "HTTPS_MEM_CERT_PATH");
+    update_option<uint16_t, 10>   (MAX_CONNECTIONS, "MAX_CONNECTIONS");
+    update_option<uint16_t, 10>   (CONNECTION_TIMEOUT, "CONNECTION_TIMEOUT");
+    update_option<uint16_t, 10>   (MEMORY_LIMIT, "MEMORY_LIMIT");
+    update_option<uint16_t, 10>   (MAX_THREADS, "MAX_THREADS");
+    update_option<std::string>    (DB_IP, "DB_IP");
+    update_option<std::string>    (DB_USERNAME, "DB_USERNAME");
+    update_option<std::string>    (DB_PASSWORD, "DB_PASSWORD");
+    update_option<std::string>    (DB_NAME, "DB_NAME");
+    update_option<uint16_t, 10>   (DB_PORT, "DB_PORT");
 }
 
 // getters
@@ -121,4 +177,7 @@ std::string Config::GET_DB_NAME(){
 }
 uint16_t    Config::GET_DB_PORT(){
     return DB_PORT;
+}
+std::string Config::GET_TNH_SETTINGS_JSON(){
+    return TNH_SETTINGS_JSON;
 }

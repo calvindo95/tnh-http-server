@@ -1,9 +1,20 @@
 #include <string>
+#include <json.hpp>
+#include <fstream>
+#include <algorithm>
+#include <thread>
+#include <iostream>
+#include <cstring>
+
+#include <Logging.h>
+
+using json = nlohmann::json;
 
 class Config{
     private:
         Config(bool debug = true);
         bool             DEBUG_FLAG;
+        Logging m_logger;
 
         // Server Configs
         uint16_t         HTTP_PORT;
@@ -21,11 +32,13 @@ class Config{
         std::string      DB_NAME;
         uint16_t         DB_PORT;
 
+        std::string      TNH_SETTINGS_JSON;
+
         template <typename T>
-        T update_option(T& option, const char* env_var);
+        void update_option(T& option, const char* env_var);
 
         template <typename T, unsigned int base>
-        T update_option(T& option, const char* env_var);
+        void update_option(T& option, const char* env_var);
 
     public:
         static Config& get_instance(bool debug = true);
@@ -43,4 +56,6 @@ class Config{
         std::string      GET_DB_PASSWORD();
         std::string      GET_DB_NAME();
         uint16_t         GET_DB_PORT();
+
+        std::string      GET_TNH_SETTINGS_JSON();
 };

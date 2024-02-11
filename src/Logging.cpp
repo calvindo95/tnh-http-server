@@ -41,31 +41,37 @@ void Logging::init(){
     boost::shared_ptr< text_sink > sink = boost::make_shared<text_sink>();
 
     // initialize stream to write to all.log
+    std::stringstream ssq;
+    ssq << GET_TNH_LOG().c_str() << "/queue.log";
     sink->locked_backend()->add_stream(
-        boost::make_shared<std::ofstream>("all.log"));
+        boost::make_shared<std::ofstream>(ssq.str()));
     sink->set_formatter(fmt);
         sink->set_filter(severity >= trace && (         // filter attributes
-        boost::log::expressions::has_attr(tag_attr) && tag_attr == "ALL"));
+        boost::log::expressions::has_attr(tag_attr) && tag_attr == "QUEUE"));
     boost::log::core::get()->add_sink(sink);
-    sink->locked_backend()->auto_flush(false);       // sets autoflush; this needs to set to false in prod(true for testing)
-
-    // initialize stream to write to performance.log
-    sink = boost::make_shared<text_sink>();
-    sink->locked_backend()->add_stream(
-        boost::make_shared<std::ofstream>("performance.log"));
-    sink->set_formatter(fmt);
-    sink->set_filter(severity >= trace && (         // filter attributes
-        boost::log::expressions::has_attr(tag_attr) && tag_attr == "PERFORMANCE_LOGGING"));
-    boost::log::core::get()->add_sink(sink);
-    sink->locked_backend()->auto_flush(true);       // sets autoflush; realtime performance monitoring
+    sink->locked_backend()->auto_flush(true);       // sets autoflush; this needs to set to false in prod(true for testing)
 
     // initialize stream to write to gentrace.log
+    std::stringstream ssg;
+    ssg << GET_TNH_LOG().c_str() << "/gentrace.log";
     sink = boost::make_shared<text_sink>();
     sink->locked_backend()->add_stream(
-        boost::make_shared<std::ofstream>("gentrace.log"));
+        boost::make_shared<std::ofstream>(ssg.str()));
     sink->set_formatter(fmt);
     sink->set_filter(severity >= trace && (         // filter attributes
         boost::log::expressions::has_attr(tag_attr) && tag_attr == "GENTRACE"));
+    boost::log::core::get()->add_sink(sink);
+    sink->locked_backend()->auto_flush(true);       // sets autoflush; needs to be false in prod(true for testing)
+
+    // initialize stream to write to event.log
+    std::stringstream sse;
+    sse << GET_TNH_LOG().c_str() << "/event.log";
+    sink = boost::make_shared<text_sink>();
+    sink->locked_backend()->add_stream(
+        boost::make_shared<std::ofstream>(sse.str()));
+    sink->set_formatter(fmt);
+    sink->set_filter(severity >= trace && (         // filter attributes
+        boost::log::expressions::has_attr(tag_attr) && tag_attr == "EVENT"));
     boost::log::core::get()->add_sink(sink);
     sink->locked_backend()->auto_flush(true);       // sets autoflush; needs to be false in prod(true for testing)
 
@@ -91,6 +97,24 @@ void Logging::log_trace(const std::stringstream& msg, const std::string& filter)
     BOOST_LOG_SEV(severity_log, Logging::severity_level::trace) << msg.str();
 }
 
+void Logging::log(severity_level sl, const std::stringstream& msg, const std::string& filter){
+    boost::log::sources::severity_logger_mt<severity_level> severity_log;       // need to use _mt to allow multithreading
+    char* buffer = new char[filter.length() +1];
+    std::strcpy(buffer, filter.c_str());
+    
+    BOOST_LOG_SCOPED_THREAD_TAG("Tag", buffer);
+    BOOST_LOG_SEV(severity_log, sl) << msg.str();
+}
+
+void Logging::log(severity_level sl, const std::string& msg, const std::string& filter){
+    boost::log::sources::severity_logger_mt<severity_level> severity_log;       // need to use _mt to allow multithreading
+    char* buffer = new char[filter.length() +1];
+    std::strcpy(buffer, filter.c_str());
+    
+    BOOST_LOG_SCOPED_THREAD_TAG("Tag", buffer);
+    BOOST_LOG_SEV(severity_log, sl) << msg;
+}
+
 // helper function to make human-readable severity level
 std::ostream& operator<<(std::ostream& strm, Logging::severity_level level)
 {
@@ -111,4 +135,14 @@ std::ostream& operator<<(std::ostream& strm, Logging::severity_level level)
         strm << static_cast< int >(level);
 
     return strm;
+}
+
+std::string Logging::GET_TNH_LOG(){
+    char* buffer = getenv("TNH_LOG");
+    if(buffer != NULL){
+        std::string option = static_cast<std::string>(buffer);
+
+        return option;
+    }
+    return NULL;
 }

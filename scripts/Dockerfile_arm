@@ -1,0 +1,56 @@
+FROM tnh-base-arm
+
+########## START ROOT ##########
+
+USER root
+RUN useradd -ms /bin/bash webserver
+ENV HOME=/home/webserver
+
+ENV TNH_HOME=$HOME/tnh-http-server
+ENV TNH_SETTINGS_JSON=$TNH_HOME/tnh_settings.json
+ENV TNH_LOG=/var/opt/tnh-server
+ENV TNH_EXEC=/usr/local/bin/tnh-server
+
+RUN mkdir -p $TNH_LOG 
+RUN chown webserver:webserver $TNH_LOG
+
+WORKDIR /home/webserver
+RUN git clone -b test https://github.com/calvindo95/tnh-http-server.git && \
+    cd tnh-http-server/include && wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp && cd .. && \
+    mkdir build && cd build && \
+    cmake .. && \
+    cmake --build . -j4 --target install
+
+COPY --chown=webserver:webserver tnh_settings.json $TNH_SETTINGS_JSON
+
+
+
+ENV EGCS_HOME=/home/webserver/eg-cs
+ENV EGS_EXEC=/usr/local/bin/egs
+ENV EGCS_SETTINGS_JSON=$EGCS_HOME/egcs_settings.json
+ENV EGCS_LOG=/var/opt/egcs
+ENV EVENT_DIR=$EGCS_LOG/queue/
+
+RUN mkdir $EGCS_LOG
+RUN chown webserver:webserver $EGCS_LOG
+
+WORKDIR /home/webserver
+RUN git clone -b test https://github.com/calvindo95/eg-cs.git && \
+    cd eg-cs/include && wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp && cd .. && \
+    mkdir build && cd build && \
+    cmake .. && \
+    cmake --build . -j4 --target install
+
+COPY --chown=webserver:webserver egcs_settings.json $EGCS_SETTINGS_JSON
+
+########## END ROOT ##########
+
+
+
+########## START WEBSERVER ##########
+
+USER webserver
+WORKDIR /home/webserver
+CMD ["/home/webserver/tnh-http-server/scripts/run_server.sh"]
+
+########## END WEBSERVER ##########

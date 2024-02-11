@@ -7,7 +7,6 @@
 #include <atomic>
 
 #include <Config.h>                 // Config
-#include <Performance.h>            // Performance_Monitoring
 #include <Logging.h>                // Logging
 #include <Resource.h>               // Resource
 
@@ -16,14 +15,14 @@ void custom_access_log(const std::string& url){
 }
 
 int main(int argc, char** argv) {
-    Config& config = Config::get_instance();
-
     Logging log;
     log.init();
 
-    //std::atomic<bool> stop_thread_flag = false;
-    //Performance_Monitoring pm(stop_thread_flag);
-    //std::thread t(&Performance_Monitoring::run, std::ref(pm));
+    std::stringstream ss;
+    ss << "Initializing tnh-server" << std::endl;
+    log.log(Logging::severity_level::normal, ss, "GENTRACE");
+
+    Config& config = Config::get_instance();
 
     httpserver::create_webserver cw = httpserver::create_webserver(config.GET_HTTP_PORT())
         // set required parameters
