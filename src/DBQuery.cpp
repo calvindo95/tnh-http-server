@@ -69,13 +69,20 @@ int DBQuery::insert(std::string query){
 
     // End logic
 
-    if(mysql_query(m_conn, query.c_str())){
+    if(mysql_ping(m_conn)){
+        if(mysql_query(m_conn, query.c_str())){
+            std::stringstream ss;
+            ss << "Error running query: " << query;
+            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+            return 1;
+        }
+    }
+    else{
         std::stringstream ss;
-        ss << "Error running query: " << query;
+        ss << "SQL connection has one stale";
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
-    
     return 0;
 }
 
