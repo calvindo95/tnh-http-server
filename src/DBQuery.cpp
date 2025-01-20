@@ -72,7 +72,7 @@ int DBQuery::insert(std::string query){
     int ret_val = mysql_ping(m_conn);
 
     if(ret_val == 0){
-        if(mysql_query(m_conn, query.c_str() != 0)){
+        if(mysql_query(m_conn, query.c_str())){
             std::stringstream ss;
             ss << "Error running query: " << query;
             m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
