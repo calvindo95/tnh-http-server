@@ -71,22 +71,29 @@ int DBQuery::insert(std::string query){
 
     // End logic
 
-    int ret_val = mysql_ping(m_conn);
-
-    if(ret_val == 0){
-        if(mysql_query(m_conn, query.c_str())){
-            std::stringstream ss;
-            ss << "Error running query: " << query;
-            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-            return 1;
-        }
-    }
-    else{
+    if(mysql_query(m_conn, query.c_str())){
         std::stringstream ss;
-        ss << "SQL connection has gone stale: " << ret_val;
+        ss << "Error running query: " << query;
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
+
+    //int ret_val = mysql_ping(m_conn);
+//
+    //if(ret_val == 0){
+    //    if(mysql_query(m_conn, query.c_str())){
+    //        std::stringstream ss;
+    //        ss << "Error running query: " << query;
+    //        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+    //        return 1;
+    //    }
+    //}
+    //else{
+    //    std::stringstream ss;
+    //    ss << "SQL connection has gone stale: " << ret_val;
+    //    m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+    //    return 1;
+    //}
     return 0;
 }
 
