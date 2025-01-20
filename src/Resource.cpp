@@ -81,11 +81,6 @@ void post_json::consume_thread() noexcept{
             std::stringstream ssq_temp;
             nlohmann::json j = m_tsq.pop();
 
-            ss << "queue size: " << queue_size;
-            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-            ss.str(std::string());
-            ss.clear();
-
             ssq_temp << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
             INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
@@ -93,7 +88,7 @@ void post_json::consume_thread() noexcept{
         }
 
         // Check if ssq is empty and execute insert
-        if(ssq.rdbuf()->in_avail() > 0){
+        if(queue_size > 0){
             ret_val += dbq.insert(ssq.str());
 
             if(ret_val != 0){
