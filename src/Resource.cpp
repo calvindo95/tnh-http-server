@@ -70,54 +70,36 @@ int post_json::parse_json(std::string json_string, nlohmann::json& json){
 }
 
 void post_json::consume_thread() noexcept{
-    DBQuery dbq;
     std::stringstream ss;
     while(true){
+        DBQuery dbq;
         int ret_val = 0;
-        nlohmann::json j = m_tsq.pop();
+        int queue_size = m_tsq.size();
+        std::stringstream ssq;
 
-        // DeviceID hash CurrentDateTime Temperature Humidity
-        if(j.contains("DeviceID") && j.contains("hash") && j.contains("CurrentDateTime") && j.contains("Temperature") && j.contains("Humidity")){
-            std::stringstream ssq;
-            // Build insert query
-            ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
+        for(int i = 0; i < queue_size; i++){
+            std::stringstream ssq_temp;
+            nlohmann::json j = m_tsq.pop();
+
+            ssq_temp << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
             INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
-            ret_val += dbq.insert(ssq.str());
-
-            if(ret_val != 0){
-                ss << "Error inserting json data: " << j;
-                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-                ss.str(std::string());
-                ss.clear();
-            }
+            ssq << ssq_temp.str();
         }
 
-        // Application Code PID Text Time UID
-        if(j.contains("Application") && j.contains("Dev_ID") && j.contains("Text") && j.contains("UID")){
-            ss << j.dump() << std::endl;
-            m_logger.log(Logging::severity_level::trace, ss, "EVENT");
+        ret_val += dbq.insert(ssq.str());
+
+        if(ret_val != 0){
+            ss << "Error inserting json data: " << ssq.str;
+            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
             ss.str(std::string());
             ss.clear();
-
-            // insert into EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) select 4,AppTbl.AppID,"2023-12-03 14:38:04","Test Event text" from AppTbl where AppName='TEST';
-
-            std::stringstream ssq;
-            ssq << "INSERT INTO EvtHist(DeviceID, AppID, CurrentDateTime, EvtText) SELECT " << j["Dev_ID"] << ",AppTbl.AppID," << j["Time"] << "," << j["Text"] << " FROM AppTbl WHERE AppName =" << j["Application"] << ";";
-
-            ret_val += dbq.insert(ssq.str());
-
-            if(ret_val != 0){
-                ss << "Error inserting json data: " << j;
-                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-                ss.str(std::string());
-                ss.clear();
-            }
         }
-
-        ss << "Processing queue size reduced by 1 to: " << m_tsq.size();
-        m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
-        ss.str(std::string());
-        ss.clear();
+        else{
+            ss << "Processing queue size reduced by " << queue_size << " to: " << m_tsq.size();
+            m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
+            ss.str(std::string());
+            ss.clear();
+        }
     }
 }

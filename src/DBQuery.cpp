@@ -11,8 +11,6 @@ DBQuery::DBQuery(){
     }
     else{
         m_conn = conn;
-        bool reconnect= 1; /* enable reconnect */
-        mysql_optionsv(m_conn, MYSQL_OPT_RECONNECT, (void *)&reconnect);
     }
 
     if(!mysql_real_connect(
@@ -77,23 +75,6 @@ int DBQuery::insert(std::string query){
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
-
-    //int ret_val = mysql_ping(m_conn);
-//
-    //if(ret_val == 0){
-    //    if(mysql_query(m_conn, query.c_str())){
-    //        std::stringstream ss;
-    //        ss << "Error running query: " << query;
-    //        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-    //        return 1;
-    //    }
-    //}
-    //else{
-    //    std::stringstream ss;
-    //    ss << "SQL connection has gone stale: " << ret_val;
-    //    m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-    //    return 1;
-    //}
     return 0;
 }
 
