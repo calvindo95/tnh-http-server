@@ -81,6 +81,11 @@ void post_json::consume_thread() noexcept{
             std::stringstream ssq_temp;
             nlohmann::json j = m_tsq.pop();
 
+            ss << "queue size: " << queue_size;
+            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+            ss.str(std::string());
+            ss.clear();
+
             ssq_temp << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
             INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
