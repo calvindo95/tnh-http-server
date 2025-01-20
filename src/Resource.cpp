@@ -74,40 +74,40 @@ void post_json::consume_thread() noexcept{
     while(true){
         DBQuery dbq;
         int ret_val = 0;
-        int queue_size = m_tsq.size();
         std::stringstream ssq;
 
-        ss << "QUEUE SIZE: " << queue_size;
-        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-        ss.str(std::string());
-        ss.clear();
+        // Wait for first message
+        nlohmann::json j = m_tsq.pop();
+
+        ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
+        INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
+
+        // If many messages in queue, add inserts to query
+        int queue_size = m_tsq.size();
 
         for(int i = 0; i < queue_size; i++){
             std::stringstream ssq_temp;
-            nlohmann::json j = m_tsq.pop();
+            nlohmann::json j_temp = m_tsq.pop();
 
-            ssq_temp << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
-            INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
+            ssq_temp << "INSERT INTO History (Temperature, Humidity) VALUES(" << j_temp["Temperature"] << "," << j_temp["Humidity"] << "); \
+            INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j_temp["DeviceID"] << ",LAST_INSERT_ID()," << j_temp["CurrentDateTime"] << ");";
 
             ssq << ssq_temp.str();
         }
 
-        // Check if ssq is empty and execute insert
-        if(queue_size > 0){
-            ret_val += dbq.insert(ssq.str());
+        ret_val += dbq.insert(ssq.str());
 
-            if(ret_val != 0){
-                ss << "Error inserting json data: " << ssq.str();
-                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-                ss.str(std::string());
-                ss.clear();
-            }
-            else{
-                ss << "Processing queue size reduced by " << queue_size << " to: " << m_tsq.size();
-                m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
-                ss.str(std::string());
-                ss.clear();
-            }
+        if(ret_val != 0){
+            ss << "Error inserting json data: " << ssq.str();
+            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+            ss.str(std::string());
+            ss.clear();
+        }
+        else{
+            ss << "Processing queue size reduced by " << queue_size << " to: " << m_tsq.size();
+            m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
+            ss.str(std::string());
+            ss.clear();
         }
     }
 }
