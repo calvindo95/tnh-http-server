@@ -77,6 +77,11 @@ void post_json::consume_thread() noexcept{
         int queue_size = m_tsq.size();
         std::stringstream ssq;
 
+        ss << "QUEUE SIZE: " << queue_size;
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+        ss.str(std::string());
+        ss.clear();
+
         for(int i = 0; i < queue_size; i++){
             std::stringstream ssq_temp;
             nlohmann::json j = m_tsq.pop();
