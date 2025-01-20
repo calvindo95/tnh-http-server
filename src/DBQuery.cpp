@@ -11,6 +11,8 @@ DBQuery::DBQuery(){
     }
     else{
         m_conn = conn;
+        bool reconnect= 1; /* enable reconnect */
+        mysql_optionsv(m_conn, MYSQL_OPT_RECONNECT, (void *)&reconnect);
     }
 
     if(!mysql_real_connect(
