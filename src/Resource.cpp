@@ -105,7 +105,7 @@ void post_json::consume_thread() noexcept{
             ss.clear();
         }
         else{
-            ss << "Processing queue size reduced by " << queue_size+1 << " to: " << m_tsq.size();
+            ss << "Processing queue size reduced by " << queue_size+1;
             m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
             ss.str(std::string());
             ss.clear();
