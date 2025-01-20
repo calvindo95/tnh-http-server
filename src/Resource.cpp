@@ -44,7 +44,8 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     if(ret_val == 0){
         m_tsq.push(tmp_j);
         std::stringstream ss;
-        ss << "Inserting data into processing queue: " << tmp_j << std::endl;
+         //ss << "Inserting data into processing queue: " << tmp_j << std::endl;
+        ss << "Processing queue size increased by 1 to: " << m_tsq.size();
         m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
     }
     else{
@@ -82,9 +83,8 @@ void post_json::consume_thread() noexcept{
         ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
         INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
-        // If many messages in queue, add inserts to query
+        // If many messages in queue, add multiple inserts to query
         int queue_size = m_tsq.size();
-
         for(int i = 0; i < queue_size; i++){
             std::stringstream ssq_temp;
             nlohmann::json j_temp = m_tsq.pop();
@@ -95,6 +95,7 @@ void post_json::consume_thread() noexcept{
             ssq << ssq_temp.str();
         }
 
+        // Execute query
         ret_val += dbq.insert(ssq.str());
 
         if(ret_val != 0){
@@ -104,7 +105,7 @@ void post_json::consume_thread() noexcept{
             ss.clear();
         }
         else{
-            ss << "Processing queue size reduced by " << queue_size << " to: " << m_tsq.size();
+            ss << "Processing queue size reduced by " << queue_size+1 << " to: " << m_tsq.size();
             m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
             ss.str(std::string());
             ss.clear();
