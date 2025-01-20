@@ -90,7 +90,7 @@ void post_json::consume_thread() noexcept{
         ret_val += dbq.insert(ssq.str());
 
         if(ret_val != 0){
-            ss << "Error inserting json data: " << ssq.str;
+            ss << "Error inserting json data: " << ssq.str();
             m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
             ss.str(std::string());
             ss.clear();
