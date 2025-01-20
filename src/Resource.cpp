@@ -92,19 +92,22 @@ void post_json::consume_thread() noexcept{
             ssq << ssq_temp.str();
         }
 
-        ret_val += dbq.insert(ssq.str());
+        // Check if ssq is empty and execute insert
+        if(ssq.rdbuf()->in_avail() > 0){
+            ret_val += dbq.insert(ssq.str());
 
-        if(ret_val != 0){
-            ss << "Error inserting json data: " << ssq.str();
-            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-            ss.str(std::string());
-            ss.clear();
-        }
-        else{
-            ss << "Processing queue size reduced by " << queue_size << " to: " << m_tsq.size();
-            m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
-            ss.str(std::string());
-            ss.clear();
+            if(ret_val != 0){
+                ss << "Error inserting json data: " << ssq.str();
+                m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+                ss.str(std::string());
+                ss.clear();
+            }
+            else{
+                ss << "Processing queue size reduced by " << queue_size << " to: " << m_tsq.size();
+                m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
+                ss.str(std::string());
+                ss.clear();
+            }
         }
     }
 }
