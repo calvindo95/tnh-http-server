@@ -25,23 +25,23 @@ COPY --chown=webserver:webserver tnh_settings.json $TNH_SETTINGS_JSON
 
 
 
-ENV EGCS_HOME=/home/webserver/eg-cs
-ENV EGS_EXEC=/usr/local/bin/egs
-ENV EGCS_SETTINGS_JSON=$EGCS_HOME/egcs_settings.json
-ENV EGCS_LOG=/var/opt/egcs
-ENV EVENT_DIR=$EGCS_LOG/queue/
-
-RUN mkdir $EGCS_LOG
-RUN chown webserver:webserver $EGCS_LOG
-
-WORKDIR /home/webserver
-RUN git clone -b test https://github.com/calvindo95/eg-cs.git && \
-    cd eg-cs/include && wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp && cd .. && \
-    mkdir build && cd build && \
-    cmake .. && \
-    cmake --build . -j4 --target install
-
-COPY --chown=webserver:webserver egcs_settings.json $EGCS_SETTINGS_JSON
+#ENV EGCS_HOME=/home/webserver/eg-cs
+#ENV EGS_EXEC=/usr/local/bin/egs
+#ENV EGCS_SETTINGS_JSON=$EGCS_HOME/egcs_settings.json
+#ENV EGCS_LOG=/var/opt/egcs
+#ENV EVENT_DIR=$EGCS_LOG/queue/
+#
+#RUN mkdir $EGCS_LOG
+#RUN chown webserver:webserver $EGCS_LOG
+#
+#WORKDIR /home/webserver
+#RUN git clone -b test https://github.com/calvindo95/eg-cs.git && \
+#    cd eg-cs/include && wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp && cd .. && \
+#    mkdir build && cd build && \
+#    cmake .. && \
+#    cmake --build . -j4 --target install
+#
+#COPY --chown=webserver:webserver egcs_settings.json $EGCS_SETTINGS_JSON
 
 ########## END ROOT ##########
 

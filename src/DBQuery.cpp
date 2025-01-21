@@ -76,10 +76,6 @@ int DBQuery::insert(std::string query){
         return 1;
     }
 
-    std::stringstream ss_log;
-    ss_log << "Successfully ran query: " << query;
-    m_logger.log(Logging::severity_level::warning, ss_log, "GENTRACE");
-
     return 0;
 }
 
