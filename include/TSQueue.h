@@ -40,6 +40,23 @@ class TSQueue{
             return item;
         };
 
+        // Returns object T and int n of size of the queue after the pop
+        T pop(int& n){
+            // Lock the queue
+            std::unique_lock<std::mutex> lock(m_mutex);
+
+            // Wait until queue is not empty
+            m_cond.wait(lock, [this]{return !m_queue.empty();});
+
+            // Get item from queue and pop
+            T item = m_queue.front();
+            m_queue.pop();
+
+            n = m_queue.size();
+
+            return item;
+        };
+
         int size(){
             // Lock the queue
             std::unique_lock<std::mutex> lock(m_mutex);

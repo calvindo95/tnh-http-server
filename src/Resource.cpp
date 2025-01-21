@@ -76,15 +76,15 @@ void post_json::consume_thread() noexcept{
         DBQuery dbq;
         int ret_val = 0;
         std::stringstream ssq;
+        int queue_size = 0;
 
         // Wait for first message
-        nlohmann::json j = m_tsq.pop();
+        nlohmann::json j = m_tsq.pop(queue_size);
 
         ssq << "INSERT INTO History (Temperature, Humidity) VALUES(" << j["Temperature"] << "," << j["Humidity"] << "); \
         INSERT INTO Data_History (DeviceID, HistoryID, CurrentDateTime) VALUES (" << j["DeviceID"] << ",LAST_INSERT_ID()," << j["CurrentDateTime"] << ");";
 
         // If many messages in queue, add multiple inserts to query
-        int queue_size = m_tsq.size();
         for(int i = 0; i < queue_size; i++){
             std::stringstream ssq_temp;
             nlohmann::json j_temp = m_tsq.pop();
