@@ -81,14 +81,14 @@ void post_json::consume_thread() noexcept{
         // Wait for first message
         nlohmann::json j = m_tsq.pop(queue_size);
 
-        ssq << "INSERT INTO History (Temperature, Humidity,DeviceID, CurrentDateTime) VALUES(" << j["Temperature"] << "," << j["Humidity"] << ","<< j["DeviceID"] << j["CurrentDateTime"] << ");";
+        ssq << "INSERT INTO History (Temperature, Humidity,DeviceID, CurrentDateTime) VALUES(" << j["Temperature"] << "," << j["Humidity"] << ","<< j["DeviceID"] << "," << j["CurrentDateTime"] << ");";
 
         // If many messages in queue, add multiple inserts to query
         for(int i = 0; i < queue_size; i++){
             std::stringstream ssq_temp;
             nlohmann::json j_temp = m_tsq.pop();
 
-            ssq_temp << "INSERT INTO History (Temperature, Humidity,DeviceID, CurrentDateTime) VALUES(" << j_temp["Temperature"] << "," << j_temp["Humidity"] << ","<< j_temp["DeviceID"] << j_temp["CurrentDateTime"] << ");";
+            ssq_temp << "INSERT INTO History (Temperature, Humidity,DeviceID, CurrentDateTime) VALUES(" << j_temp["Temperature"] << "," << j_temp["Humidity"] << ","<< j_temp["DeviceID"] << "," << j_temp["CurrentDateTime"] << ");";
 
 
             ssq << ssq_temp.str();
