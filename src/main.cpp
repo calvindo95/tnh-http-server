@@ -44,6 +44,9 @@ int main(int argc, char** argv) {
     post_json pj;
     ws.register_resource("/post_json", &pj);
 
+    get_single_data gsd;
+    ws.register_resource("/select", &gsd);
+
     // start web server
     ws.start(true);
 

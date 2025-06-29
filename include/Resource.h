@@ -31,7 +31,5 @@ class post_json : public httpserver::http_resource, public HTTPResources {
 
 class get_single_data : public httpserver::http_resource, public HTTPResources {
     public:
-    get_single_data();
-
-    std::shared_ptr<httpserver::http_response> render(const httpserver::http_request& req);
-}
+        std::shared_ptr<httpserver::http_response> render(const httpserver::http_request& req);
+};

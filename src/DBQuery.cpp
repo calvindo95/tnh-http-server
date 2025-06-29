@@ -90,8 +90,11 @@ int DBQuery::select(std::string query, std::string output){
     }
 
     result = mysql_use_result(m_conn);
-    if(result != NULL){
-        MYSQL_ROW row;
+    if(result == NULL){
+        return 1;
+    }
+
+    MYSQL_ROW row;
         std::string tmp_result;
 
         row = mysql_fetch_row(result);
@@ -105,7 +108,6 @@ int DBQuery::select(std::string query, std::string output){
 
         mysql_free_result(result);
         return 0;
-    }
 }
 
 int DBQuery::get_last_insert_id(){

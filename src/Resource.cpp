@@ -118,10 +118,6 @@ Class get_single_data
 
 ********************/
 
-get_single_data::get_single_data(){
-    // do nothing for now
-}
-
 std::shared_ptr<httpserver::http_response> get_single_data::render(const httpserver::http_request& req){
     int ret_val = 0; 
     nlohmann::json tmp_j;
@@ -140,7 +136,7 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
     std::string tmp = std::string(req.get_content());
 
     // Parse json string into json object
-    ret_val += parse_json(tmp,tmp_j);
+    tmp_j = nlohmann::json::parse(tmp);
 
     if(ret_val != 0){
         std::stringstream ss;
@@ -151,7 +147,7 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
     }
     else{
         std::stringstream ssq;
-        int DeviceID = j_temp["DeviceID"];
+        int DeviceID = tmp_j["DeviceID"];
 
         std::string output;
 
@@ -160,5 +156,7 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
         dbq.select(ssq.str(), output);
 
         m_logger.log(Logging::severity_level::warning, output, "GENTRACE");
+
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(output));
     }
 }
