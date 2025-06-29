@@ -28,3 +28,10 @@ class post_json : public httpserver::http_resource, public HTTPResources {
         // Parse csv into std::map<std::string,std::string>
         int parse_json(std::string json_string, nlohmann::json& json);
 };
+
+class get_single_data : public httpserver::http_resource, public HTTPResources {
+    public:
+    get_single_data();
+
+    std::shared_ptr<httpserver::http_response> render(const httpserver::http_request& req);
+}

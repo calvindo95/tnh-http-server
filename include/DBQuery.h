@@ -21,6 +21,8 @@ class DBQuery{
 
         void query(std::string query);
 
+        int select(std::string query, std::string output);
+
         int get_last_insert_id();
 };
 #endif

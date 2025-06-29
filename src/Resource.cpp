@@ -111,3 +111,54 @@ void post_json::consume_thread() noexcept{
         }
     }
 }
+
+/********************
+ 
+Class get_single_data
+
+********************/
+
+get_single_data::get_single_data(){
+    // do nothing for now
+}
+
+std::shared_ptr<httpserver::http_response> get_single_data::render(const httpserver::http_request& req){
+    int ret_val = 0; 
+    nlohmann::json tmp_j;
+
+    DBQuery dbq;
+    
+    std::map<std::string_view, std::string_view, httpserver::http::header_comparator> headers;
+    headers = req.get_headers();
+
+    if(headers["Content-Type"] != "application/json"){
+        m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json"), "GENTRACE");
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
+    }
+
+    // Get body of request to string
+    std::string tmp = std::string(req.get_content());
+
+    // Parse json string into json object
+    ret_val += parse_json(tmp,tmp_j);
+
+    if(ret_val != 0){
+        std::stringstream ss;
+        ss << "Failed to parse json in get_single_data::render() " << tmp << std::endl;
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
+    }
+    else{
+        std::stringstream ssq;
+        int DeviceID = j_temp["DeviceID"];
+
+        std::string output;
+
+        ssq << "SELECT JSON_OBJECT('HistoryID', `HistoryID`, 'CurrentDateTime', `CurrentDateTime`, 'DeviceID', " << DeviceID << ", 'Temperature', `Temperature`) FROM History LIMIT 1;";
+
+        dbq.select(ssq.str(), output);
+
+        m_logger.log(Logging::severity_level::warning, output, "GENTRACE");
+    }
+}

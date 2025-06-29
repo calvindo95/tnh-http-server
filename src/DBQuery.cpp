@@ -79,6 +79,35 @@ int DBQuery::insert(std::string query){
     return 0;
 }
 
+int DBQuery::select(std::string query, std::string output){
+    MYSQL_RES *result;
+
+    if(mysql_query(m_conn, query.c_str())){
+        std::stringstream ss;
+        ss << "Error running query: " << query;
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+        return 1;
+    }
+
+    result = mysql_use_result(m_conn);
+    if(result != NULL){
+        MYSQL_ROW row;
+        std::string tmp_result;
+
+        row = mysql_fetch_row(result);
+
+        // Make sure the row is not null
+        if(row[0]){
+            tmp_result = std::string(row[0]);
+        }
+
+        output = tmp_result;
+
+        mysql_free_result(result);
+        return 0;
+    }
+}
+
 int DBQuery::get_last_insert_id(){
     return mysql_insert_id(m_conn);
 }
