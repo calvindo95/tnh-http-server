@@ -82,7 +82,7 @@ int DBQuery::insert(std::string query){
 int DBQuery::select(std::string query, std::string output){
     MYSQL_RES *result;
 
-    if(mysql_query(m_conn, query.c_str())){
+    if(mysql_real_query(m_conn, query.c_str(), query.length())){
         std::stringstream ss;
         ss << "Error running query: " << query;
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
@@ -112,7 +112,7 @@ int DBQuery::select(std::string query, std::string output){
         tmp_result += "\n"; // Add a newline after each row
     }
     output = tmp_result;
-    
+
     mysql_free_result(result);
 
     return 0;
