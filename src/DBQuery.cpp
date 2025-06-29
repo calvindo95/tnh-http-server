@@ -97,16 +97,24 @@ int DBQuery::select(std::string query, std::string output){
     MYSQL_ROW row;
     std::string tmp_result;
 
-    row = mysql_fetch_row(result);
-
-    // Make sure the row is not null
-    if(row[0]){
-        tmp_result = std::string(row[0]);
+    while ((row = mysql_fetch_row(result))) {
+        // Iterate through columns in the current row
+        for (int i = 0; i < mysql_num_fields(result); ++i) {
+            if (row[i]) { // Check if the field is not NULL
+                tmp_result += std::string(row[i]);
+            } else {
+                tmp_result += "NULL"; // Handle NULL values
+            }
+            if (i < mysql_num_fields(result) - 1) {
+                tmp_result += "\t"; // Add a tab delimiter between fields
+            }
+        }
+        tmp_result += "\n"; // Add a newline after each row
     }
-
     output = tmp_result;
-
+    
     mysql_free_result(result);
+
     return 0;
 }
 

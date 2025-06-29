@@ -155,8 +155,6 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
 
         ssq << "SELECT JSON_OBJECT('HistoryID', `HistoryID`, 'CurrentDateTime', `CurrentDateTime`, 'DeviceID', " << DeviceID << ", 'Temperature', `Temperature`) FROM History LIMIT 1;";
 
-        dbq.select(ssq.str(), output);
-
         if(dbq.select(ssq.str(), output) != 0){
             m_logger.log(Logging::severity_level::warning, "Failed to execute select " + ssq.str(), "GENTRACE");
         }
