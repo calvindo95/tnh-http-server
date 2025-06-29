@@ -149,9 +149,12 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
         std::stringstream ssq;
         int DeviceID = tmp_j["DeviceID"];
 
+        m_logger.log(Logging::severity_level::warning, std::to_string(DeviceID), "GENTRACE");
+
         std::string output;
 
-        ssq << "SELECT JSON_OBJECT('HistoryID', `HistoryID`, 'CurrentDateTime', `CurrentDateTime`, 'DeviceID', " << DeviceID << ", 'Temperature', `Temperature`) FROM History LIMIT 1;";
+        //ssq << "SELECT JSON_OBJECT('HistoryID', `HistoryID`, 'CurrentDateTime', `CurrentDateTime`, 'DeviceID', " << DeviceID << ", 'Temperature', `Temperature`) FROM History LIMIT 1;";
+        ssq << "SELECT * FROM History LIMIT 1";
 
         dbq.select(ssq.str(), output);
 
