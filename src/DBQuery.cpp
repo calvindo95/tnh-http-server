@@ -80,40 +80,50 @@ int DBQuery::insert(std::string query){
 }
 
 int DBQuery::select(std::string query, std::string output){
-    MYSQL_RES *result;
 
-    if(mysql_real_query(m_conn, query.c_str(), query.length())){
+    if(mysql_query(m_conn, query.c_str())){
         std::stringstream ss;
         ss << "Error running query: " << query;
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
 
-    result = mysql_use_result(m_conn);
-    if(result == NULL){
-        return 1;
+    MYSQL_ROW row;
+    MYSQL_RES *result;
+    std::string tmp_result;
+    int num_fields;
+    int num_rows;
+
+    result = mysql_store_result(m_conn);
+    if(result){
+        num_fields = mysql_num_fields(result);
+        while (row = mysql_fetch_row(result)) {
+            // Iterate through columns in the current row
+            for (int i = 0; i < num_fields; ++i) {
+                if (row[i]) { // Check if the field is not NULL
+                    tmp_result += std::string(row[i]);
+                } else {
+                    tmp_result += "NULL"; // Handle NULL values
+                }
+                if (i < num_fields - 1) {
+                    tmp_result += "\t"; // Add a tab delimiter between fields
+                }
+            }
+            tmp_result += "\n"; // Add a newline after each row
+        }
+    }
+    else{
+        if(mysql_field_count(m_conn) == 0){
+            // query didn't return anything
+            m_logger.log(Logging::severity_level::warning, "query didn't return anything", "GENTRACE");
+        }
+        else{
+            // query returned something but something went wrong
+            m_logger.log(Logging::severity_level::warning, "query returned something but something went wrong", "GENTRACE");
+        }
     }
 
-    MYSQL_ROW row;
-    std::string tmp_result;
-
-//    while (row = mysql_fetch_row(result)) {
-//        // Iterate through columns in the current row
-//        for (int i = 0; i < mysql_num_fields(result); ++i) {
-//            if (row[i]) { // Check if the field is not NULL
-//                tmp_result += std::string(row[i]);
-//            } else {
-//                tmp_result += "NULL"; // Handle NULL values
-//            }
-//            if (i < mysql_num_fields(result) - 1) {
-//                tmp_result += "\t"; // Add a tab delimiter between fields
-//            }
-//        }
-//        tmp_result += "\n"; // Add a newline after each row
-//    }
-
-    row = mysql_fetch_row(result);
-    output = std::string(row[0]);
+    output = tmp_result;
 
     mysql_free_result(result);
 
