@@ -153,9 +153,9 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
 
         std::string output;
 
-        //ssq << "SELECT JSON_OBJECT('HistoryID', `HistoryID`, 'CurrentDateTime', `CurrentDateTime`, 'DeviceID', " << DeviceID << ", 'Temperature', `Temperature`) FROM History LIMIT 1;";
+        ssq << "SELECT JSON_OBJECT('HistoryID', `HistoryID`, 'CurrentDateTime', `CurrentDateTime`, 'DeviceID', " << DeviceID << ", 'Temperature', `Temperature`) FROM History LIMIT 1;";
         //ssq << "SELECT * FROM History WHERE DeviceID = " << DeviceID << " ORDER BY CurrentDateTime DESC LIMIT 1;";
-        ssq << "SELECT * FROM History ORDER BY CurrentDateTime DESC LIMIT 1;";
+        //ssq << "SELECT * FROM History ORDER BY CurrentDateTime DESC LIMIT 1;";
 
 
         if(dbq.select(ssq.str(), output) != 0){

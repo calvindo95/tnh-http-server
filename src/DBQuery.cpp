@@ -79,26 +79,21 @@ int DBQuery::insert(std::string query){
     return 0;
 }
 
-int DBQuery::select(std::string query, std::string output){
-    m_logger.log(Logging::severity_level::warning, "here", "GENTRACE");
-
+int DBQuery::select(std::string query, std::string &output){
     if(mysql_query(m_conn, query.c_str())){
         std::stringstream ss;
         ss << "Error running query: " << query;
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
-    m_logger.log(Logging::severity_level::warning, "here", "GENTRACE");
 
     MYSQL_ROW row;
     MYSQL_RES *result;
-    std::string tmp_result = "test123";
+    std::string tmp_result;
     int num_fields;
     int num_rows;
-    m_logger.log(Logging::severity_level::warning, tmp_result, "GENTRACE");
 
     result = mysql_store_result(m_conn);
-    m_logger.log(Logging::severity_level::warning, "here", "GENTRACE");
 
     if(result){
         num_fields = mysql_num_fields(result);
@@ -116,7 +111,6 @@ int DBQuery::select(std::string query, std::string output){
             }
             tmp_result += "\n"; // Add a newline after each row
         }
-        m_logger.log(Logging::severity_level::warning, tmp_result, "GENTRACE");
 
     }
     else{
@@ -129,11 +123,9 @@ int DBQuery::select(std::string query, std::string output){
             m_logger.log(Logging::severity_level::warning, "query returned something but something went wrong", "GENTRACE");
         }
     }
-    m_logger.log(Logging::severity_level::warning, "here", "GENTRACE");
+    
     output = tmp_result;
-    m_logger.log(Logging::severity_level::warning, "here", "GENTRACE");
     mysql_free_result(result);
-    m_logger.log(Logging::severity_level::warning, "here", "GENTRACE");
     return 0;
 }
 
