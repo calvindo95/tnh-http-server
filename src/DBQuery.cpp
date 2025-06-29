@@ -95,6 +95,7 @@ int DBQuery::select(std::string query, std::string output){
     std::string tmp_result = "test123";
     int num_fields;
     int num_rows;
+    m_logger.log(Logging::severity_level::warning, tmp_result, "GENTRACE");
 
     result = mysql_store_result(m_conn);
     m_logger.log(Logging::severity_level::warning, "here", "GENTRACE");
@@ -115,6 +116,8 @@ int DBQuery::select(std::string query, std::string output){
             }
             tmp_result += "\n"; // Add a newline after each row
         }
+        m_logger.log(Logging::severity_level::warning, tmp_result, "GENTRACE");
+
     }
     else{
         if(mysql_field_count(m_conn) == 0){
