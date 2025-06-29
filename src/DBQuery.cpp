@@ -95,19 +95,19 @@ int DBQuery::select(std::string query, std::string output){
     }
 
     MYSQL_ROW row;
-        std::string tmp_result;
+    std::string tmp_result;
 
-        row = mysql_fetch_row(result);
+    row = mysql_fetch_row(result);
 
-        // Make sure the row is not null
-        if(row[0]){
-            tmp_result = std::string(row[0]);
-        }
+    // Make sure the row is not null
+    if(row[0]){
+        tmp_result = std::string(row[0]);
+    }
 
-        output = tmp_result;
+    output = tmp_result;
 
-        mysql_free_result(result);
-        return 0;
+    mysql_free_result(result);
+    return 0;
 }
 
 int DBQuery::get_last_insert_id(){
