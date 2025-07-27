@@ -32,14 +32,15 @@ int main(int argc, char** argv) {
         .start_method(httpserver::http::http_utils::INTERNAL_SELECT)
         .max_threads(config.GET_MAX_THREADS())
         .log_access(custom_access_log)
-        .use_dual_stack();
+        .use_dual_stack()
+        .not_found_resource(not_found_custom);
 
     // create webserver
     httpserver::webserver ws = cw;
     
     // create resource and endpoint
     check_connection hwr;
-    ws.register_resource("/helloworld", &hwr);
+    ws.register_resource("/check_connection", &hwr);
     
     post_json pj;
     ws.register_resource("/post_json", &pj);
