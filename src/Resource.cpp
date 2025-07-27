@@ -12,6 +12,7 @@ std::shared_ptr<httpserver::http_response> not_found_custom(const httpserver::ht
     return std::shared_ptr<httpserver::string_response>(new httpserver::string_response("Not found custom", 404, "text/plain"));
 }
 
+// this has not been fully implemented
 std::shared_ptr<httpserver::http_response> not_allowed_custom(const httpserver::http_request& req) {
     return std::shared_ptr<httpserver::string_response>(new httpserver::string_response("Not allowed custom", 405, "text/plain"));
 }
@@ -136,8 +137,10 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
     headers = req.get_headers();
 
     if(headers["Content-Type"] != "application/json"){
-        m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json"), "GENTRACE");
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
+        std::string header(headers["Content-Type"]);
+
+        m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json; received header: " + header), "GENTRACE");
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received Content-Type: " + header));
     }
 
     // Get body of request to string
