@@ -40,8 +40,10 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
     headers = req.get_headers();
 
     if(headers["Content-Type"] != "application/json"){
-        m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json"), "GENTRACE");
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
+        std::string header(headers["Content-Type"]);
+
+        m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json; received header: " + header), "GENTRACE");
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received Content-Type: " + header + "\n"));
     }
 
     // Get body of request to string
@@ -63,7 +65,7 @@ std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::h
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
     }
 
-    return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val)));
+    return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val) + "\n"));
 }
 
 int post_json::parse_json(std::string json_string, nlohmann::json& json){
@@ -140,7 +142,7 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
         std::string header(headers["Content-Type"]);
 
         m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json; received header: " + header), "GENTRACE");
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received Content-Type: " + header));
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received Content-Type: " + header + "\n"));
     }
 
     // Get body of request to string
@@ -154,7 +156,7 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
         ss << "Failed to parse json in get_single_data::render() " << tmp << std::endl;
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
 
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1)));
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Received data value: " + std::to_string(ret_val=1) + "\n"));
     }
     else{
         std::stringstream ssq;
@@ -172,6 +174,6 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
 
         m_logger.log(Logging::severity_level::warning, output, "GENTRACE");
 
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(output));
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(output + "\n"));
     }
 }
