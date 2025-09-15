@@ -162,8 +162,6 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
         std::stringstream ssq;
         int DeviceID = tmp_j["DeviceID"];
 
-        m_logger.log(Logging::severity_level::warning, std::to_string(DeviceID), "GENTRACE");
-
         std::string output;
 
         ssq << "SELECT JSON_OBJECT('CurrentDateTime', `CurrentDateTime`, 'DeviceID', `DeviceID`, 'Temperature', `Temperature`, 'Humidity', `Humidity`) FROM History WHERE DeviceID = " << DeviceID << " ORDER BY CurrentDateTime DESC LIMIT 1;";
@@ -171,8 +169,6 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
         if(dbq.select(ssq.str(), output) != 0){
             m_logger.log(Logging::severity_level::warning, "Failed to execute select " + ssq.str(), "GENTRACE");
         }
-
-        m_logger.log(Logging::severity_level::warning, output, "GENTRACE");
 
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(output + "\n"));
     }
