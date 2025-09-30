@@ -14,7 +14,10 @@ target_link_libraries(logging ${Boost_LIBRARIES})
 add_library(resource STATIC Resource.cpp)
 target_link_libraries(resource logging dbquery)
 
+add_library(register_device STATIC RegisterDevice.cpp)
+target_link_libraries(register_device dbquery)
+
 add_executable(${TARGET} main.cpp)
-target_link_libraries(${TARGET} httpserver microhttpd config resource)
+target_link_libraries(${TARGET} httpserver microhttpd config resource register_device)
 
 install(TARGETS ${TARGET} DESTINATION /usr/local/bin)

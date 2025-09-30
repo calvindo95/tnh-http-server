@@ -1,3 +1,6 @@
+#ifndef MAIN
+#define MAIN
+
 #include <httpserver.hpp>
 #include <iostream>
 #include <iomanip>
@@ -9,6 +12,7 @@
 #include <Config.h>                 // Config
 #include <Logging.h>                // Logging
 #include <Resource.h>               // Resource
+#include <RegisterDevice.h>
 
 void custom_access_log(const std::string& url){
     // I will probably log something here when clients connect
@@ -48,8 +52,13 @@ int main(int argc, char** argv) {
     get_single_data gsd;
     ws.register_resource("/select", &gsd);
 
+    register_device rg;
+    ws.register_resource("/register_device", &rg);
+
     // start web server
     ws.start(true);
 
     return 0;
 }
+
+#endif
