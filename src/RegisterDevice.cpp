@@ -110,7 +110,7 @@ std::shared_ptr<httpserver::http_response> register_device::render(const httpser
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("DevName " + device_name + " does not exist"));
     }
     else{
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("DevName " + device_name + " exists with DevID of: " + ret));
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("DevName " + device_name + " exists with DevID of: " + std::to_string(ret)));
     }
     
     // if name exists return existing num
