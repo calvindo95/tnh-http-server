@@ -1,3 +1,6 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #include <string>
 #include <json.hpp>
 #include <fstream>
@@ -59,3 +62,5 @@ class Config{
 
         std::string      GET_TNH_SETTINGS_JSON();
 };
+
+#endif
