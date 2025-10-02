@@ -21,6 +21,6 @@ add_library(register_device STATIC RegisterDevice.cpp)
 target_link_libraries(register_device dbquery)
 
 add_executable(${TARGET} main.cpp)
-target_link_libraries(${TARGET} httpserver microhttpd config resource register_device)
+target_link_libraries(${TARGET} httpserver microhttpd config resource register_device dbq)
 
 install(TARGETS ${TARGET} DESTINATION /usr/local/bin)
