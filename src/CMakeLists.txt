@@ -1,12 +1,15 @@
 include_directories(../include)
 include_directories(/usr/include/mariadb)
-find_library(mariadb NAMES mariadb PATHS /usr/lib/arm-linux-gnueabihf)
+find_library(mariadb NAMES mariadb PATHS /usr/lib/aarch64-linux-gnu)
 
 add_library(config STATIC Config.cpp)
 target_link_libraries(config logging)
 
 add_library(dbquery STATIC DBQuery.cpp)
 target_link_libraries(dbquery mariadb)
+
+add_library(dbq STATIC DBQ.cpp)
+target_link_libraries(dbq PRIVATE mariadbcpp)
 
 add_library(logging STATIC Logging.cpp)
 target_link_libraries(logging ${Boost_LIBRARIES})

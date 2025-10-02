@@ -4,6 +4,7 @@
 
 #include <DBQuery.h>
 #include <Logging.h>
+
 #include <json.hpp>
 
 int register_device::extract_key_value(nlohmann::json json, std::string key, std::string &value){
@@ -53,39 +54,6 @@ int register_device::get_body_json(const httpserver::http_request &req, nlohmann
     return 0;
 }
 
-// return 0 if error; return -1 if devname does not exist; return int of devname if exists
-int register_device::check_if_devname_exists(std::string devname){
-    std::stringstream ssq;
-    DBQuery dbq;
-    std::string query_string;
-    nlohmann::json query_json;
-
-    ssq << "SELECT JSON_OBJECT('DeviceID', CAST(`DeviceID` AS CHAR)) FROM Device WHERE DevName='" << devname << "'";
-    //ssq << "SELECT JSON_OBJECT('DeviceID', `DeviceID`) FROM Device WHERE DevName='" << devname << "'";
-
-    if(dbq.select(ssq.str(), query_string) != 0){
-        m_logger.log(Logging::severity_level::warning, "Select failed " + ssq.str(), "GENTRACE");
-    }
-
-    if(query_string.empty()){
-        m_logger.log(Logging::severity_level::warning, "query_string " + query_string, "GENTRACE");
-        return -1;
-    }
-
-    if(parse_json(query_string, query_json) != 0){
-        m_logger.log(Logging::severity_level::warning, "Failed to parse json " + query_string, "GENTRACE");
-        return 0;
-    }
-
-    std::string existing_devid;
-    if(extract_key_value(query_json, "DeviceID", existing_devid) != 0){
-        m_logger.log(Logging::severity_level::warning, "Failed to extract DeviceID from json " + query_json.dump(), "GENTRACE");
-        return 0;
-    }
-
-    return std::stoi(existing_devid);
-}
-
 std::shared_ptr<httpserver::http_response> register_device::render(const httpserver::http_request& req){
     nlohmann::json body_json;
     int ret =  0;
@@ -102,15 +70,33 @@ std::shared_ptr<httpserver::http_response> register_device::render(const httpser
     }
 
     // check if device name exists in dev_name table
-    ret = check_if_devname_exists(device_name);
-    if(ret == 0){
+    ret = m_dbq.get_device_id(device_name);
+    if(ret == -1){
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Error checking if DevName exists: " + body_json.dump()));
     }
-    else if(ret == -1){
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("DevName " + device_name + " does not exist"));
+    else if(ret == 0){
+        int devid;
+
+        m_logger.log(Logging::severity_level::info, std::string("DevName " + device_name + " does not exist, inserting into DB"), "GENTRACE");
+        
+        m_dbq.insert_devname(device_name);
+        devid = m_dbq.get_device_id(device_name);
+
+        if(devid <= 0){
+            return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Failed to insert DevName " + device_name + " into DB\n"));
+        }
+
+        m_logger.log(Logging::severity_level::info, std::string("Successfully inserted DevName " + device_name + " into DB"), "GENTRACE");
+
+        nlohmann::json j;
+
+        j["DeviceID"] = devid;
+        j["DevName"] = device_name;
+
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump()));
     }
     else{
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("DevName " + device_name + " exists with DevID of: " + std::to_string(ret)));
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("DevName " + device_name + " exists with DevID of: " + std::to_string(ret) + "\n"));
     }
     
     // if name exists return existing num
