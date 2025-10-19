@@ -24,5 +24,6 @@ class DBQ{
 
         int get_device_id(std::string devname);
         void insert_devname(std::string devname);
+        void get_last_device_entry(int deviceid, nlohmann::json &json);
 };
 #endif

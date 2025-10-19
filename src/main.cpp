@@ -13,6 +13,7 @@
 #include <Logging.h>                // Logging
 #include <Resource.h>               // Resource
 #include <RegisterDevice.h>
+#include <GetLastEntry.h>
 
 void custom_access_log(const std::string& url){
     // I will probably log something here when clients connect
@@ -54,6 +55,9 @@ int main(int argc, char** argv) {
 
     register_device rg;
     ws.register_resource("/register_device", &rg);
+
+    get_last_entry gle;
+    ws.register_resource("/get_last_entry", &gle);
 
     // start web server
     ws.start(true);

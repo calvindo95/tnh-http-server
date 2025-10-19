@@ -62,3 +62,47 @@ void DBQ::insert_devname(std::string devname){
         m_logger.log(Logging::severity_level::critical, e.what(), "GENTRACE");
     }
 }
+
+void DBQ::get_last_device_entry(int deviceid, nlohmann::json &json){
+    std::shared_ptr<sql::PreparedStatement> pstatement(m_conn->prepareStatement("SELECT CurrentDateTime, DeviceID FROM History WHERE DeviceID=? ORDER BY CurrentDateTime DESC LIMIT 1"));
+    nlohmann::json j;
+
+    try{
+        std::string cdt;
+        pstatement->setString(1, std::to_string(deviceid));
+
+        // executeQuery() returns sql::ResultSet object
+        std::unique_ptr<sql::ResultSet> res(pstatement->executeQuery());
+
+        while(res->next()){
+            if(std::stoi(res->getString("DeviceID").c_str()) == deviceid){
+                cdt = res->getString("CurrentDateTime");
+            }
+        }
+
+        // If cdt is empty, return empty json obj
+        if(cdt.empty()){
+            std::stringstream ss;
+            ss << "DeviceID " << deviceid << " does not exist";
+
+            j["error"] = ss.str();
+
+            json = j;
+            return;
+        }
+
+        j["DeviceID"] = deviceid;
+        j["CurrentDateTime"] = cdt;
+
+        json = j;
+        return;
+    }
+    catch(sql::SQLException &e){
+        m_logger.log(Logging::severity_level::critical, e.what(), "GENTRACE");
+        
+        j["error"] = e.what();
+
+        json = j;
+        return;
+    }
+}

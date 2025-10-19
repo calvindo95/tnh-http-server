@@ -20,7 +20,9 @@ target_link_libraries(resource logging dbquery)
 add_library(register_device STATIC RegisterDevice.cpp)
 target_link_libraries(register_device dbquery)
 
+add_library(get_last_entry STATIC GetLastEntry.cpp HTTPResources.cpp)
+
 add_executable(${TARGET} main.cpp)
-target_link_libraries(${TARGET} httpserver microhttpd config resource register_device dbq)
+target_link_libraries(${TARGET} httpserver microhttpd config resource register_device dbq get_last_entry)
 
 install(TARGETS ${TARGET} DESTINATION /usr/local/bin)
