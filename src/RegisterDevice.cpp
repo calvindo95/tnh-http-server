@@ -21,59 +21,38 @@ int register_device::extract_key_value(nlohmann::json json, std::string key, std
     return 0;
 }
 
-int register_device::parse_json(std::string json_string, nlohmann::json& json){
-    std::stringstream ss;
-
-    if(!nlohmann::json::accept(json_string)){
-        ss << "Failed to parse json string: " << json_string << std::endl;
-        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-        return 1;
-    }
-
-    json = nlohmann::json::parse(json_string);
-    return 0;
-}
-
-int register_device::get_body_json(const httpserver::http_request &req, nlohmann::json &json){
-    std::map<std::string_view, std::string_view, httpserver::http::header_comparator> headers;
-    headers = req.get_headers();
-
-    if(headers["Content-Type"] != "application/json"){
-        std::string header(headers["Content-Type"]);
-
-        m_logger.log(Logging::severity_level::warning, std::string("Post request Content-Type is not application/json; received header: " + header), "GENTRACE");
-        return 1;
-    }
-
-    std::string body_string = std::string(req.get_content());
-
-    if(parse_json(body_string, json) != 0){
-        return 1;
-    }
-
-    return 0;
-}
-
 std::shared_ptr<httpserver::http_response> register_device::render(const httpserver::http_request& req){
     nlohmann::json body_json;
+    std::string device_name;
     int ret =  0;
     
     // get device name
-    if(get_body_json(req, body_json) != 0){
+    HTTPResources::get_req_body_json(req, body_json);
+
+    // Make sure json body has no errors
+    if(body_json.is_null()){
+        body_json["error"] = "Error parsing request json";
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
+    }
+    if(body_json.contains("error")){
+        body_json["error"] = "Error parsing request json; json object does not contain DevName key";
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
     }
 
-    std::string device_name;
-
+    // Extract value from key DevName
     if(extract_key_value(body_json, "DevName", device_name) != 0){
+        body_json["error"] = "Json object does not contain key DevName";
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
     }
 
     // check if device name exists in dev_name table
     ret = m_dbq.get_device_id(device_name);
     if(ret == -1){
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Error checking if DevName exists: " + body_json.dump()));
+        body_json["error"] = "Error checking if DevName exists";
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
     }
+    // Insert devname if it doesn't exist in DB
+    // Returns devname and new DevID
     else if(ret == 0){
         int devid;
 
@@ -83,7 +62,11 @@ std::shared_ptr<httpserver::http_response> register_device::render(const httpser
         devid = m_dbq.get_device_id(device_name);
 
         if(devid <= 0){
-            return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("Failed to insert DevName " + device_name + " into DB\n"));
+            std::stringstream ss;
+            ss << "Failed to insert DevName " << device_name << " into DB\n";
+
+            body_json["error"] = ss.str();
+            return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
         }
 
         m_logger.log(Logging::severity_level::info, std::string("Successfully inserted DevName " + device_name + " into DB"), "GENTRACE");
@@ -95,14 +78,13 @@ std::shared_ptr<httpserver::http_response> register_device::render(const httpser
 
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump()));
     }
+    // If devname already exists, return devname and devid
     else{
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("DevName " + device_name + " exists with DevID of: " + std::to_string(ret) + "\n"));
+        nlohmann::json j;
+
+        j["DeviceID"] = ret;
+        j["DevName"] = device_name;
+
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump()));
     }
-    
-    // if name exists return existing num
-
-    // if name does not exist, insert dev_name and return new num
-
-
-    return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(device_name + "\n"));
 }
