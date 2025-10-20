@@ -17,6 +17,7 @@ std::shared_ptr<httpserver::http_response> get_last_entry::render(const httpserv
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump()));
     }
 
+    // Query DB and get last entry for DeviceID
     m_dbq.get_last_device_entry(req_json["DeviceID"], j);
 
     // if j is null or contains error key
@@ -24,5 +25,6 @@ std::shared_ptr<httpserver::http_response> get_last_entry::render(const httpserv
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump()));
     }
     
+    // Return CurrentDateTime and DevID in json format
     return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump()));
 }
