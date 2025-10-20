@@ -15,7 +15,7 @@ DBQ::DBQ(){
     sql::Properties props({
         {"user", config.GET_DB_USERNAME()},
         {"password", config.GET_DB_PASSWORD()},
-        {"autoReconnect", "FALSE"}
+        {"autoReconnect", "TRUE"}
     });
 
     m_properties = props;
