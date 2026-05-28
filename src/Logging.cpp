@@ -16,6 +16,7 @@
 
 #include <string>
 #include <iomanip>
+#include <filesystem>
 
 #include <Logging.h>
 
@@ -26,15 +27,23 @@ static void add_sink(const boost::log::formatter& fmt, const std::string& log_di
     typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_file_backend> file_sink;
 
     auto backend = boost::make_shared<boost::log::sinks::text_file_backend>(
-        boost::log::keywords::file_name = log_dir + "/" + name + "_%N.log",
+        boost::log::keywords::file_name = log_dir + "/" + name + "_0.log",
         boost::log::keywords::rotation_size = 1 * 1024 * 1024,
         boost::log::keywords::open_mode = std::ios::app
     );
-    backend->set_file_collector(boost::log::sinks::file::make_collector(
-        boost::log::keywords::target = log_dir,
-        boost::log::keywords::max_files = 10
-    ));
-    backend->scan_for_files();
+
+    // Before Boost opens a new _0, shift existing files up: _8→_9, …, _0→_1.
+    // Renaming an open file is safe on Linux; the fd remains valid until Boost closes it.
+    backend->set_close_handler([log_dir, name](boost::log::sinks::text_file_backend::stream_type&) {
+        namespace fs = std::filesystem;
+        for (int i = 8; i >= 0; --i) {
+            fs::path src = log_dir + "/" + name + "_" + std::to_string(i) + ".log";
+            fs::path dst = log_dir + "/" + name + "_" + std::to_string(i + 1) + ".log";
+            if (fs::exists(src))
+                fs::rename(src, dst);
+        }
+    });
+
     backend->auto_flush(true);
 
     auto sink = boost::make_shared<file_sink>(backend);
