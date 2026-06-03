@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
         .max_connections(config.GET_MAX_CONNECTIONS())
         .connection_timeout(config.GET_CONNECTION_TIMEOUT())
         .memory_limit(config.GET_MEMORY_LIMIT())
-        .start_method(httpserver::http::http_utils::INTERNAL_SELECT)
+        .start_method(httpserver::http::http_utils::THREAD_PER_CONNECTION)
         .max_threads(config.GET_MAX_THREADS())
         .log_access(custom_access_log)
         .use_dual_stack()
