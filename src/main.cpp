@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
         .connection_timeout(config.GET_CONNECTION_TIMEOUT())
         .memory_limit(config.GET_MEMORY_LIMIT())
         .start_method(httpserver::http::http_utils::THREAD_PER_CONNECTION)
-        .max_threads(config.GET_MAX_THREADS())
+        //.max_threads(config.GET_MAX_THREADS())
         .log_access(custom_access_log)
         .use_dual_stack()
         .not_found_resource(not_found_custom);
