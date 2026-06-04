@@ -63,6 +63,11 @@ int DBQuery::insert(std::string query){
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
         return 1;
     }
+    do {
+        MYSQL_RES* result = mysql_store_result(m_conn);
+        if (result)
+            mysql_free_result(result);
+    } while (mysql_next_result(m_conn) == 0);
 
     return 0;
 }
