@@ -11,6 +11,8 @@ DBQuery::DBQuery(){
     }
     else{
         m_conn = conn;
+        bool reconnect = true;
+        mysql_options(m_conn, MYSQL_OPT_RECONNECT, &reconnect);
     }
 
     connect_mysql();

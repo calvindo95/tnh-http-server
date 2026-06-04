@@ -68,43 +68,45 @@ int post_json::parse_json(std::string json_string, nlohmann::json& json){
 }
 
 void post_json::consume_thread() noexcept{
-    std::stringstream ss;
-    DBQuery dbq;
+    DBQ dbq;
     while(true){
-        int ret_val = 0;
-        std::stringstream ssq;
         int queue_size = 0;
+        int processed = 0;
 
-        // Wait for first message
-        nlohmann::json j = m_tsq.pop(queue_size);
+        auto insert_entry = [&](const nlohmann::json& j) {
+            if (!j["Temperature"].is_string() || !j["Humidity"].is_string() ||
+                !j["DeviceID"].is_string() || !j["CurrentDateTime"].is_string()) {
+                m_logger.log(Logging::severity_level::warning, std::string("Invalid field types in json entry"), "GENTRACE");
+                return;
+            }
 
-        ssq << "INSERT INTO History (Temperature, Humidity,DeviceID, CurrentDateTime) VALUES(" << j["Temperature"] << "," << j["Humidity"] << ","<< j["DeviceID"] << "," << j["CurrentDateTime"] << ");";
+            double t, h;
+            int did;
+            std::string cdt;
+            try {
+                t   = std::stod(j["Temperature"].get<std::string>());
+                h   = std::stod(j["Humidity"].get<std::string>());
+                did = std::stoi(j["DeviceID"].get<std::string>());
+                cdt = j["CurrentDateTime"].get<std::string>();
+            }
+            catch (const std::exception& e) {
+                m_logger.log(Logging::severity_level::warning,
+                    std::string("Failed to parse json fields: ") + e.what(), "GENTRACE");
+                return;
+            }
 
-        // If many messages in queue, add multiple inserts to query
+            dbq.insert_history(t, h, did, cdt);
+            ++processed;
+        };
+
+        insert_entry(m_tsq.pop(queue_size));
+
         for(int i = 0; i < queue_size; i++){
-            std::stringstream ssq_temp;
-            nlohmann::json j_temp = m_tsq.pop();
-
-            ssq_temp << "INSERT INTO History (Temperature, Humidity,DeviceID, CurrentDateTime) VALUES(" << j_temp["Temperature"] << "," << j_temp["Humidity"] << ","<< j_temp["DeviceID"] << "," << j_temp["CurrentDateTime"] << ");";
-
-
-            ssq << ssq_temp.str();
+            insert_entry(m_tsq.pop());
         }
 
-        // Execute query
-        ret_val += dbq.insert(ssq.str());
-
-        if(ret_val != 0){
-            ss << "Error inserting json data: " << ssq.str();
-            m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-            ss.str(std::string());
-            ss.clear();
-        }
-        else{
-            ss << "Processing queue size reduced by " << queue_size+1;
-            m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
-            ss.str(std::string());
-            ss.clear();
-        }
+        std::stringstream ss;
+        ss << "Processing queue size reduced by " << processed;
+        m_logger.log(Logging::severity_level::trace, ss, "QUEUE");
     }
 }

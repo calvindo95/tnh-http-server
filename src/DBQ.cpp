@@ -48,7 +48,22 @@ int DBQ::get_device_id(std::string devname){
     }
 }
 
-//"INSERT INTO History (Temperature, Humidity,DeviceID, CurrentDateTime) VALUES(" << j["Temperature"] << "," << j["Humidity"] << ","<< j["DeviceID"] << "," << j["CurrentDateTime"] << ");";
+void DBQ::insert_history(double temp, double humidity, int device_id, const std::string& datetime){
+    std::shared_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
+        "INSERT INTO History (Temperature, Humidity, DeviceID, CurrentDateTime) VALUES(?, ?, ?, ?)"
+    ));
+    try {
+        stmt->setDouble(1, temp);
+        stmt->setDouble(2, humidity);
+        stmt->setInt(3, device_id);
+        stmt->setString(4, datetime);
+        stmt->executeUpdate();
+    }
+    catch (sql::SQLException& e) {
+        m_logger.log(Logging::severity_level::critical, e.what(), "GENTRACE");
+    }
+}
+
 void DBQ::insert_devname(std::string devname){
     std::shared_ptr<sql::PreparedStatement> stmnt(m_conn->prepareStatement("INSERT INTO Device(DevName) VALUES (?)"));
 

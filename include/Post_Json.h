@@ -6,7 +6,7 @@
 #include <HTTPResources.h>
 #include <TSQueue.h>
 #include <Logging.h>
-#include <DBQuery.h>
+#include <DBQ.h>
 #include <json.hpp>
 
 class post_json : public httpserver::http_resource, public HTTPResources {

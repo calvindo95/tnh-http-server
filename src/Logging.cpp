@@ -28,7 +28,7 @@ static void add_sink(const boost::log::formatter& fmt, const std::string& log_di
 
     auto backend = boost::make_shared<boost::log::sinks::text_file_backend>(
         boost::log::keywords::file_name = log_dir + "/" + name + "_0.log",
-        boost::log::keywords::rotation_size = 1 * 1024 * 1024,
+        boost::log::keywords::rotation_size = 5 * 1024 * 1024,
         boost::log::keywords::open_mode = std::ios::app
     );
 
