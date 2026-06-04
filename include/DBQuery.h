@@ -12,6 +12,9 @@ class DBQuery{
         MYSQL *m_conn;
         Config& config = Config::get_instance();
         Logging m_logger;
+
+        void connect_mysql();
+        void check_connection();
         
     public:
         DBQuery();

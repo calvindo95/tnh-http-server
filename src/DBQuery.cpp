@@ -13,21 +13,7 @@ DBQuery::DBQuery(){
         m_conn = conn;
     }
 
-    if(!mysql_real_connect(
-        m_conn,
-        config.GET_DB_IP().c_str(),
-        config.GET_DB_USERNAME().c_str(),
-        config.GET_DB_PASSWORD().c_str(),
-        config.GET_DB_NAME().c_str(),
-        config.GET_DB_PORT(),
-        NULL,
-        CLIENT_MULTI_STATEMENTS
-    )){
-        std::stringstream ss;
-        ss << "Error connecting to db server: " << mysql_error(m_conn);
-        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
-        mysql_close(m_conn);
-    }
+    connect_mysql();
 }
 
 DBQuery::~DBQuery(){
@@ -68,6 +54,8 @@ int DBQuery::insert(std::string query){
     // Create logic to check if it's an insert
 
     // End logic
+
+    check_connection();
 
     if(mysql_query(m_conn, query.c_str())){
         std::stringstream ss;
@@ -131,4 +119,32 @@ int DBQuery::select(std::string query, std::string &output){
 
 int DBQuery::get_last_insert_id(){
     return mysql_insert_id(m_conn);
+}
+
+void DBQuery::connect_mysql(){
+    if(!mysql_real_connect(
+        m_conn,
+        config.GET_DB_IP().c_str(),
+        config.GET_DB_USERNAME().c_str(),
+        config.GET_DB_PASSWORD().c_str(),
+        config.GET_DB_NAME().c_str(),
+        config.GET_DB_PORT(),
+        NULL,
+        CLIENT_MULTI_STATEMENTS
+    )){
+        std::stringstream ss;
+        ss << "Error connecting to db server: " << mysql_error(m_conn);
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+        mysql_close(m_conn);
+    }
+}
+
+void DBQuery::check_connection(){
+    if(mysql_ping(m_conn) != 0){
+        std::stringstream ss;
+        ss << "DB connection lost: " << mysql_error(m_conn);
+        m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
+
+        connect_mysql();
+    }
 }
