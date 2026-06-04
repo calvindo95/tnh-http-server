@@ -14,6 +14,7 @@
 #include <Resource.h>               // Resource
 #include <RegisterDevice.h>
 #include <GetLastEntry.h>
+#include <Post_Json.h>
 
 void custom_access_log(const std::string& url){
     // I will probably log something here when clients connect
