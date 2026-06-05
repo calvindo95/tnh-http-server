@@ -23,4 +23,5 @@ class post_json : public httpserver::http_resource, public HTTPResources {
 
         // Parse csv into std::map<std::string,std::string>
         int parse_json(std::string json_string, nlohmann::json& json);
+        void insert_entry(const nlohmann::json& j, DBQ& dbq, int& processed);
 };

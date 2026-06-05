@@ -67,43 +67,42 @@ int post_json::parse_json(std::string json_string, nlohmann::json& json){
     return 0;
 }
 
+void post_json::insert_entry(const nlohmann::json& j, DBQ& dbq, int& processed){
+    if (!j["Temperature"].is_string() || !j["Humidity"].is_string() ||
+        !j["DeviceID"].is_string() || !j["CurrentDateTime"].is_string()) {
+        m_logger.log(Logging::severity_level::warning, std::string("Invalid field types in json entry"), "GENTRACE");
+        return;
+    }
+
+    double t, h;
+    int did;
+    std::string cdt;
+    try {
+        t   = std::stod(j["Temperature"].get<std::string>());
+        h   = std::stod(j["Humidity"].get<std::string>());
+        did = std::stoi(j["DeviceID"].get<std::string>());
+        cdt = j["CurrentDateTime"].get<std::string>();
+    }
+    catch (const std::exception& e) {
+        m_logger.log(Logging::severity_level::warning,
+            std::string("Failed to parse json fields: ") + e.what(), "GENTRACE");
+        return;
+    }
+
+    dbq.insert_history(t, h, did, cdt);
+    ++processed;
+}
+
 void post_json::consume_thread() noexcept{
     DBQ dbq;
     while(true){
         int queue_size = 0;
         int processed = 0;
 
-        auto insert_entry = [&](const nlohmann::json& j) {
-            if (!j["Temperature"].is_string() || !j["Humidity"].is_string() ||
-                !j["DeviceID"].is_string() || !j["CurrentDateTime"].is_string()) {
-                m_logger.log(Logging::severity_level::warning, std::string("Invalid field types in json entry"), "GENTRACE");
-                return;
-            }
+        insert_entry(m_tsq.pop(queue_size), dbq, processed);
 
-            double t, h;
-            int did;
-            std::string cdt;
-            try {
-                t   = std::stod(j["Temperature"].get<std::string>());
-                h   = std::stod(j["Humidity"].get<std::string>());
-                did = std::stoi(j["DeviceID"].get<std::string>());
-                cdt = j["CurrentDateTime"].get<std::string>();
-            }
-            catch (const std::exception& e) {
-                m_logger.log(Logging::severity_level::warning,
-                    std::string("Failed to parse json fields: ") + e.what(), "GENTRACE");
-                return;
-            }
-
-            dbq.insert_history(t, h, did, cdt);
-            ++processed;
-        };
-
-        insert_entry(m_tsq.pop(queue_size));
-
-        for(int i = 0; i < queue_size; i++){
-            insert_entry(m_tsq.pop());
-        }
+        for(int i = 0; i < queue_size; i++)
+            insert_entry(m_tsq.pop(), dbq, processed);
 
         std::stringstream ss;
         ss << "Processing queue size reduced by " << processed;
