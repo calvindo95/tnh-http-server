@@ -93,7 +93,7 @@ void post_json::insert_entry(const nlohmann::json& j, DBQ& dbq, int& processed){
         try{
             t   = std::stod(j["Temperature"].get<std::string>());
             h   = std::stod(j["Humidity"].get<std::string>());
-            dn  = j["DeviceID"].get<std::string>();
+            dn  = j["DeviceName"].get<std::string>();
             cdt = j["CurrentDateTime"].get<std::string>();
         }
         catch(const std::exception& e) {
