@@ -110,12 +110,6 @@ void post_json::insert_entry(const nlohmann::json& j, DBQ& dbq, int& processed){
         m_logger.log(Logging::severity_level::warning, ss, "GENTRACE");
     }
 
-    //if(!j["Temperature"].is_string() || !j["Humidity"].is_string() ||
-    //    !j["DeviceID"].is_string() || !j["CurrentDateTime"].is_string()) {
-    //    m_logger.log(Logging::severity_level::warning, std::string("Invalid field types in json entry"), "GENTRACE");
-    //    return;
-    //}
-
     ++processed;
 }
 
