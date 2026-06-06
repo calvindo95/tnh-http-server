@@ -21,6 +21,8 @@ int register_device::extract_key_value(nlohmann::json json, std::string key, std
     return 0;
 }
 
+// Endpoint expects json {"DevName": "Hallway"}
+// Returns json with DeviceID {"DevName":"Hallway","DeviceID":7}
 std::shared_ptr<httpserver::http_response> register_device::render(const httpserver::http_request& req){
     nlohmann::json body_json;
     std::string device_name;
