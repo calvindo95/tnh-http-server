@@ -52,5 +52,6 @@ COPY --chown=webserver:webserver tnh_settings.json $TNH_SETTINGS_JSON
 USER webserver
 WORKDIR /home/webserver
 CMD ["/home/webserver/tnh-http-server/scripts/run_server.sh"]
+USER root
 
 ########## END WEBSERVER ##########

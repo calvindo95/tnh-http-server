@@ -1,19 +1,23 @@
-FROM balenalib/raspberrypi3:bullseye
+FROM arm64v8/debian:bullseye
 
 # Update apt repos
 RUN --mount=type=cache,target=/var/cache/apt apt update --allow-unauthenticated && apt upgrade -y
 
 # Install packages
 RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends libmicrohttpd-dev
-RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends git
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends git ca-certificates
 RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends curl wget
 RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends libtool libcurl4-openssl-dev
 RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends cmake make automake
-RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends g++ clang
+RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends g++ clang gdb
 RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends libboost-dev libboost-all-dev
 RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends libmariadb-dev
 #RUN apt -y install nlohmann-json-dev
 RUN --mount=type=cache,target=/var/cache/apt apt -y install --no-install-recommends vim
+
+RUN cd /tmp &&\
+    wget https://dlm.mariadb.com/4189365/Connectors/cpp/connector-cpp-1.1.6/mariadb-connector-cpp_1.1.6-1+maria~bullseye_arm64.deb && \
+    dpkg -i mariadb-connector-cpp_1.1.6-1+maria~bullseye_arm64.deb
 
 # install libhttpserver
 RUN cd /tmp && \

@@ -4,11 +4,15 @@ if [ $# -lt 0 ]; then # checks if number of arguments is less than 2
     return 1
 fi
 
-
 build_main_img () {
-    echo "tnh-base-arm img exists, building tnh-server-arm img"
     sh scripts/build_img.sh scripts/Dockerfile_arm tnh-server-arm
+}
 
+build_base_img() {
+    sh scripts/build_img.sh scripts/Dockerfile_arm_base tnh-base-arm
+}
+
+restart_container(){
     if $(docker ps | grep -q tnh-server)
     then
         echo "tnh-server still active, stopping."
@@ -18,17 +22,20 @@ build_main_img () {
     fi
 
     yes | docker container prune
+    yes | docker image prune
 
     # Usage: 'sh spinup.sh <image name>' <port> <container name>
     sh scripts/spinup.sh tnh-server-arm 8081 tnh-server
 }
 
-if $(docker image ls | grep -q tnh-base-arm)
-then
-    build_main_img
-else
-    echo "tnh-base-arm img does not exist, building base img"
-    sh scripts/build_img.sh scripts/Dockerfile_arm_base tnh-base-arm
+##### MAIN #####
+while getopts "a" opt; do
+    case "${opt}" in
+        a) 
+            echo "Building Base img"
+            build_base_img;;
+    esac
+done
 
-    build_main_img
-fi
+build_main_img
+restart_container
