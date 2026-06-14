@@ -181,3 +181,42 @@ nlohmann::json DBQ::list_device_count_json(){
 
     return result;
 }
+nlohmann::json DBQ::get_device_history(int deviceid, const std::string& start, const std::string& end, int bucket_minutes){
+    const int bucket = bucket_minutes < 1 ? 1 : bucket_minutes;
+
+    std::unique_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
+        "SELECT "
+        "  FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(CurrentDateTime) / (? * 60)) * (? * 60)) AS CurrentDateTime, "
+        "  AVG(Temperature) AS Temperature, "
+        "  AVG(Humidity) AS Humidity "
+        "FROM History "
+        "WHERE DeviceID = ? AND CurrentDateTime BETWEEN ? AND ? "
+        "GROUP BY FLOOR(UNIX_TIMESTAMP(CurrentDateTime) / (? * 60)) "
+        "ORDER BY CurrentDateTime ASC"
+    ));
+
+    nlohmann::json result = nlohmann::json::array();
+
+    try {
+        stmt->setInt(1, bucket);
+        stmt->setInt(2, bucket);
+        stmt->setInt(3, deviceid);
+        stmt->setString(4, start);
+        stmt->setString(5, end);
+        stmt->setInt(6, bucket);
+
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
+        while (res->next()) {
+            result.push_back({
+                {"CurrentDateTime", res->getString("CurrentDateTime").c_str()},
+                {"Temperature",     res->getDouble("Temperature")},
+                {"Humidity",        res->getDouble("Humidity")}
+            });
+        }
+    }
+    catch (sql::SQLException& e) {
+        m_logger.log(Logging::severity_level::critical, e.what(), "GENTRACE");
+    }
+
+    return result;
+}

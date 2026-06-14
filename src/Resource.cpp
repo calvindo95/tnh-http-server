@@ -24,6 +24,8 @@ std::shared_ptr<httpserver::http_response> check_connection::render(const httpse
 /********************
  
 Class get_single_data
+Input:  {"DeviceID": 1}
+Return: {"CurrentDateTime": "2026-06-14 17:40:01", "DeviceID": 1, "Temperature": 68.35, "Humidity": 73.6928}
 
 ********************/
 

@@ -1,5 +1,13 @@
 #include <GetLastEntry.h>
 
+/********************
+ 
+Class get_last_entry
+Input:  {"DeviceID": 1}
+Return: {"CurrentDateTime":"2026-06-14 17:40:01","DeviceID":1}
+
+********************/
+
 std::shared_ptr<httpserver::http_response> get_last_entry::render(const httpserver::http_request& req){
     nlohmann::json req_json;
     nlohmann::json j;
