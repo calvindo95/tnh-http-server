@@ -24,8 +24,13 @@ class DBQ{
 
         int get_device_id(std::string devname);
         void insert_devname(std::string devname);
+        
         void get_last_device_entry(int deviceid, nlohmann::json &json);
+        
         void insert_history(double temp, double humidity, int device_id, const std::string& datetime);
         void insert_history(double temp, double humidity, std::string devicename, const std::string& datetime);
+
+        std::string list_device_count();
+        nlohmann::json list_device_count_json();
 };
 #endif

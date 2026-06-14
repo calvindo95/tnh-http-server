@@ -14,6 +14,7 @@ add_executable(${TARGET}
     RegisterDevice.cpp
     GetLastEntry.cpp
     HTTPResources.cpp
+    ListDevices.cpp
 )
 
 target_link_libraries(${TARGET}

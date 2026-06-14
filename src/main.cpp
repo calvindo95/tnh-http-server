@@ -15,6 +15,7 @@
 #include <RegisterDevice.h>
 #include <GetLastEntry.h>
 #include <Post_Json.h>
+#include <ListDevices.h>
 
 void custom_access_log(const std::string& url){
     // I will probably log something here when clients connect
@@ -59,6 +60,9 @@ int main(int argc, char** argv) {
 
     get_last_entry gle;
     ws.register_resource("/get_last_entry", &gle);
+
+    list_devices ld;
+    ws.register_resource("/list_devices", &ld);
 
     // start web server
     ws.start(true);
