@@ -8,6 +8,7 @@
 
 class get_history : public httpserver::http_resource, public HTTPResources {
     Logging m_logger;
+    DBQ m_dbq;
 public:
     std::shared_ptr<httpserver::http_response> render(const httpserver::http_request& req);
 };

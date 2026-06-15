@@ -29,8 +29,7 @@ std::shared_ptr<httpserver::http_response> get_history::render(const httpserver:
     std::string end     = req_json["EndDateTime"].get<std::string>();
     int bucket_minutes  = req_json.contains("BucketMinutes") ? req_json["BucketMinutes"].get<int>() : 5;
 
-    DBQ dbq;
-    nlohmann::json result = dbq.get_device_history(device_id, start, end, bucket_minutes);
+    nlohmann::json result = m_dbq.get_device_history(device_id, start, end, bucket_minutes);
 
     return std::shared_ptr<httpserver::http_response>(
         new httpserver::string_response(result.dump() + "\n", 200, "application/json")
