@@ -1,4 +1,8 @@
+#include <regex>
+
 #include <GetHistory.h>
+
+static const std::regex DATE_PATTERN(R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})");
 
 /********************
 
@@ -24,10 +28,36 @@ std::shared_ptr<httpserver::http_response> get_history::render(const httpserver:
         return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump(), 400, "application/json"));
     }
 
+    if(!req_json["DeviceID"].is_number_integer()){
+        j["error"] = "DeviceID must be an integer";
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump(), 400, "application/json"));
+    }
+
+    if(!req_json["StartDateTime"].is_string() || !req_json["EndDateTime"].is_string()){
+        j["error"] = "StartDateTime and EndDateTime must be strings";
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump(), 400, "application/json"));
+    }
+
     int device_id       = req_json["DeviceID"].get<int>();
     std::string start   = req_json["StartDateTime"].get<std::string>();
     std::string end     = req_json["EndDateTime"].get<std::string>();
+
+    if(!std::regex_match(start, DATE_PATTERN) || !std::regex_match(end, DATE_PATTERN)){
+        j["error"] = "Invalid date format. Expected: YYYY-MM-DD HH:MM:SS";
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump(), 400, "application/json"));
+    }
+
+    if(req_json.contains("BucketMinutes") && !req_json["BucketMinutes"].is_number_integer()){
+        j["error"] = "BucketMinutes must be an integer";
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump(), 400, "application/json"));
+    }
+
     int bucket_minutes  = req_json.contains("BucketMinutes") ? req_json["BucketMinutes"].get<int>() : 5;
+
+    if(bucket_minutes > 1440){
+        j["error"] = "BucketMinutes must not exceed 1440";
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(j.dump(), 400, "application/json"));
+    }
 
     nlohmann::json result = m_dbq.get_device_history(device_id, start, end, bucket_minutes);
 
