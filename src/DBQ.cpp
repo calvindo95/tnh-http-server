@@ -130,8 +130,8 @@ void DBQ::get_last_device_entry(int deviceid, nlohmann::json &json){
     }
     catch(sql::SQLException &e){
         m_logger.log(Logging::severity_level::critical, e.what(), "GENTRACE");
-        
-        j["error"] = e.what();
+
+        j["error"] = "Database error";
 
         json = j;
         return;
@@ -202,7 +202,7 @@ void DBQ::get_last_device_data(int deviceid, nlohmann::json& json){
     }
     catch(sql::SQLException& e){
         m_logger.log(Logging::severity_level::critical, e.what(), "GENTRACE");
-        json = {{"error", e.what()}};
+        json = {{"error", "Database error"}};
     }
 }
 
