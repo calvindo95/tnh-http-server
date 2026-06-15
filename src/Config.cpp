@@ -10,8 +10,8 @@ Config::Config(bool debug):
     HTTPS_MEM_KEY("./certs/server_ca/private/smoothstack_server.key"),
     HTTPS_MEM_CERT("./certs/server_ca/certs/smoothstack_server.crt"),
     DB_IP("127.0.0.1"),
-    DB_USERNAME("admin"),
-    DB_PASSWORD("password"),
+    DB_USERNAME(""),
+    DB_PASSWORD(""),
     DB_NAME(""),
     DB_PORT(9090){
     // update values if environment variables are set
