@@ -5,10 +5,13 @@ Class post_json
 ********************/
 
 #include <chrono>
+#include <regex>
 #include <sstream>
 #include <iostream>
 #include <filesystem>
 #include <unistd.h>
+
+static const std::regex DATE_PATTERN(R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})");
 
 #include <Post_Json.h>
 
@@ -72,6 +75,12 @@ void post_json::insert_entry(const nlohmann::json& j, DBQ& dbq, int& processed){
         double t        = std::stod(j["Temperature"].get<std::string>());
         double h        = std::stod(j["Humidity"].get<std::string>());
         std::string cdt = j["CurrentDateTime"].get<std::string>();
+
+        if(!std::regex_match(cdt, DATE_PATTERN)){
+            m_logger.log(Logging::severity_level::warning,
+                "Invalid CurrentDateTime format: " + cdt, "GENTRACE");
+            return;
+        }
 
         if(j.contains("DeviceID"))
             dbq.insert_history(t, h, std::stoi(j["DeviceID"].get<std::string>()), cdt);
