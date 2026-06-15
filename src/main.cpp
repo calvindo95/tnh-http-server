@@ -12,6 +12,7 @@
 #include <Config.h>                 // Config
 #include <Logging.h>                // Logging
 #include <Resource.h>               // Resource
+#include <GetSingleData.h>
 #include <RegisterDevice.h>
 #include <GetLastEntry.h>
 #include <Post_Json.h>
@@ -54,7 +55,9 @@ int main(int argc, char** argv) {
     ws.register_resource("/post_json", &pj);
 
     get_single_data gsd;
-    ws.register_resource("/select", &gsd);
+    ws.register_resource("/get_single_data", &gsd);
+    //ws.register_resource("/select", &gsd);
+
 
     register_device rg;
     ws.register_resource("/register_device", &rg);

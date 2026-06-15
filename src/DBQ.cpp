@@ -181,6 +181,31 @@ nlohmann::json DBQ::list_device_count_json(){
 
     return result;
 }
+
+void DBQ::get_last_device_data(int deviceid, nlohmann::json& json){
+    std::unique_ptr<sql::PreparedStatement> stmt(
+        m_conn->prepareStatement(
+            "SELECT JSON_OBJECT('CurrentDateTime', `CurrentDateTime`, 'DeviceID', `DeviceID`, 'Temperature', `Temperature`, 'Humidity', `Humidity`) FROM History WHERE DeviceID = ? ORDER BY CurrentDateTime DESC LIMIT 1"
+        )
+    );
+
+    try{
+        stmt->setInt(1, deviceid);
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
+
+        if(res->next()){
+            json = nlohmann::json::parse(res->getString(1).c_str());
+        }
+        else{
+            json = {{"error", "No entry found for DeviceID " + std::to_string(deviceid)}};
+        }
+    }
+    catch(sql::SQLException& e){
+        m_logger.log(Logging::severity_level::critical, e.what(), "GENTRACE");
+        json = {{"error", e.what()}};
+    }
+}
+
 nlohmann::json DBQ::get_device_history(int deviceid, const std::string& start, const std::string& end, int bucket_minutes){
     const int bucket = bucket_minutes < 1 ? 1 : bucket_minutes;
 

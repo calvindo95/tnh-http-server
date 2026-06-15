@@ -16,6 +16,7 @@ add_executable(${TARGET}
     HTTPResources.cpp
     ListDevices.cpp
     GetHistory.cpp
+    GetSingleData.cpp
 )
 
 target_link_libraries(${TARGET}

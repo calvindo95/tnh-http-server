@@ -16,8 +16,3 @@ class check_connection : public httpserver::http_resource {
     public:
         std::shared_ptr<httpserver::http_response> render(const httpserver::http_request& req);
 };
-
-class get_single_data : public httpserver::http_resource, public HTTPResources {
-    public:
-        std::shared_ptr<httpserver::http_response> render(const httpserver::http_request& req);
-};

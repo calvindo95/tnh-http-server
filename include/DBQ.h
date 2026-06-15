@@ -33,6 +33,8 @@ class DBQ{
         std::string list_device_count();
         nlohmann::json list_device_count_json();
 
+        void get_last_device_data(int deviceid, nlohmann::json& json);
+
         nlohmann::json get_device_history(int deviceid, const std::string& start, const std::string& end, int bucket_minutes);
 };
 #endif
