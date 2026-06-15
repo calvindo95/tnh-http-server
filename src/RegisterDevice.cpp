@@ -32,26 +32,23 @@ std::shared_ptr<httpserver::http_response> register_device::render(const httpser
     HTTPResources::get_req_body_json(req, body_json);
 
     // Make sure json body has no errors
-    if(body_json.is_null()){
-        body_json["error"] = "Error parsing request json";
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
-    }
-    if(body_json.contains("error")){
-        body_json["error"] = "Error parsing request json; json object does not contain DevName key";
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
+    if(body_json.is_null() || body_json.contains("error")){
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("{\"error\":\"Error parsing request json\"}", 400, "application/json"));
     }
 
     // Extract value from key DevName
     if(extract_key_value(body_json, "DevName", device_name) != 0){
-        body_json["error"] = "Json object does not contain key DevName";
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("{\"error\":\"Missing DevName\"}", 400, "application/json"));
+    }
+
+    if(device_name.empty() || device_name.length() > 64){
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("{\"error\":\"DevName must be between 1 and 64 characters\"}", 400, "application/json"));
     }
 
     // check if device name exists in dev_name table
     ret = m_dbq.get_device_id(device_name);
     if(ret == -1){
-        body_json["error"] = "Error checking if DevName exists";
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("{\"error\":\"Internal server error\"}", 500, "application/json"));
     }
     // Insert devname if it doesn't exist in DB
     // Returns devname and new DevID
@@ -59,16 +56,13 @@ std::shared_ptr<httpserver::http_response> register_device::render(const httpser
         int devid;
 
         m_logger.log(Logging::severity_level::info, std::string("DevName " + device_name + " does not exist, inserting into DB"), "GENTRACE");
-        
+
         m_dbq.insert_devname(device_name);
         devid = m_dbq.get_device_id(device_name);
 
         if(devid <= 0){
-            std::stringstream ss;
-            ss << "Failed to insert DevName " << device_name << " into DB\n";
-
-            body_json["error"] = ss.str();
-            return std::shared_ptr<httpserver::http_response>(new httpserver::string_response(body_json.dump()));
+            m_logger.log(Logging::severity_level::warning, "Failed to insert DevName into DB", "GENTRACE");
+            return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("{\"error\":\"Internal server error\"}", 500, "application/json"));
         }
 
         m_logger.log(Logging::severity_level::info, std::string("Successfully inserted DevName " + device_name + " into DB"), "GENTRACE");
