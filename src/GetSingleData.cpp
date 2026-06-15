@@ -25,8 +25,8 @@ std::shared_ptr<httpserver::http_response> get_single_data::render(const httpser
 
     tmp_j = nlohmann::json::parse(tmp);
 
-    if(!tmp_j.contains("DeviceID")){
-        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("{\"error\":\"Missing DeviceID\"}\n", 400, "application/json"));
+    if(!tmp_j.contains("DeviceID") || !tmp_j["DeviceID"].is_number_integer()){
+        return std::shared_ptr<httpserver::http_response>(new httpserver::string_response("{\"error\":\"Missing or invalid DeviceID\"}\n", 400, "application/json"));
     }
 
     int DeviceID = tmp_j["DeviceID"];
