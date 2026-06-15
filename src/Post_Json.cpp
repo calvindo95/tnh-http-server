@@ -82,9 +82,7 @@ void post_json::insert_entry(const nlohmann::json& j, DBQ& dbq, int& processed){
             return;
         }
 
-        if(j.contains("DeviceID"))
-            dbq.insert_history(t, h, std::stoi(j["DeviceID"].get<std::string>()), cdt);
-        else if(j.contains("DeviceName"))
+        if(j.contains("DeviceName"))
             dbq.insert_history(t, h, j["DeviceName"].get<std::string>(), cdt);
         else
             m_logger.log(Logging::severity_level::warning,
