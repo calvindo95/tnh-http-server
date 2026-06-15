@@ -2,7 +2,6 @@
 
 #include <sstream>
 
-#include <DBQuery.h>
 #include <Logging.h>
 
 #include <json.hpp>
