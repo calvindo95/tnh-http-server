@@ -70,6 +70,7 @@ void Logging::init(){
     add_sink(fmt, log_dir, "queue", "QUEUE");
     add_sink(fmt, log_dir, "gentrace", "GENTRACE");
     add_sink(fmt, log_dir, "event", "EVENT");
+    add_sink(fmt, log_dir, "auth", "AUTH");
 
     boost::log::add_common_attributes();
 }

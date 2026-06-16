@@ -25,10 +25,9 @@ class Config{
         uint16_t         CONNECTION_TIMEOUT;
         uint16_t         MEMORY_LIMIT;
         uint16_t         MAX_THREADS;
-        std::string      HTTPS_MEM_KEY;
-        std::string      HTTPS_MEM_CERT;
+        uint16_t         SESSION_TIMEOUT;
 
-        // HTTP Server Configs
+        // DB Server Configs
         std::string      DB_IP;
         std::string      DB_USERNAME;
         std::string      DB_PASSWORD;
@@ -53,6 +52,7 @@ class Config{
         uint16_t         GET_CONNECTION_TIMEOUT();
         uint16_t         GET_MEMORY_LIMIT();
         uint16_t         GET_MAX_THREADS();
+        uint16_t         GET_SESSION_TIMEOUT();
 
         std::string      GET_DB_IP();
         std::string      GET_DB_USERNAME();

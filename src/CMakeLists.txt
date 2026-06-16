@@ -17,6 +17,11 @@ add_executable(${TARGET}
     ListDevices.cpp
     GetHistory.cpp
     GetSingleData.cpp
+    AuthResources.cpp
+    AuthUser.cpp
+    RegisterUser.cpp
+    AuthServ.cpp
+    AuthSession.cpp
 )
 
 target_link_libraries(${TARGET}
@@ -25,6 +30,8 @@ target_link_libraries(${TARGET}
     ${Boost_LIBRARIES}
     mariadb
     mariadbcpp
+    ssl
+    crypto
 )
 
 install(TARGETS ${TARGET} DESTINATION /usr/local/bin)

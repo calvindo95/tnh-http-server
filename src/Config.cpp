@@ -6,9 +6,8 @@ Config::Config(bool debug):
     MAX_CONNECTIONS(32), 
     CONNECTION_TIMEOUT(180), 
     MEMORY_LIMIT(32768),
-    MAX_THREADS(1), 
-    HTTPS_MEM_KEY("./certs/server_ca/private/smoothstack_server.key"),
-    HTTPS_MEM_CERT("./certs/server_ca/certs/smoothstack_server.crt"),
+    MAX_THREADS(1),
+    SESSION_TIMEOUT(10), 
     DB_IP("127.0.0.1"),
     DB_USERNAME(""),
     DB_PASSWORD(""),
@@ -128,12 +127,12 @@ Config& Config::get_instance(bool debug){
 void Config::update_config(){
     update_option<std::string>    (TNH_SETTINGS_JSON, "TNH_SETTINGS_JSON");
     update_option<uint16_t, 10>   (HTTP_PORT, "HTTP_PORT");
-    update_option<std::string>    (HTTPS_MEM_KEY, "HTTPS_MEM_KEY_PATH");
-    update_option<std::string>    (HTTPS_MEM_CERT, "HTTPS_MEM_CERT_PATH");
     update_option<uint16_t, 10>   (MAX_CONNECTIONS, "MAX_CONNECTIONS");
     update_option<uint16_t, 10>   (CONNECTION_TIMEOUT, "CONNECTION_TIMEOUT");
     update_option<uint16_t, 10>   (MEMORY_LIMIT, "MEMORY_LIMIT");
     update_option<uint16_t, 10>   (MAX_THREADS, "MAX_THREADS");
+    update_option<uint16_t, 10>   (SESSION_TIMEOUT, "SESSION_TIMEOUT");
+
     update_option<std::string>    (DB_IP, "DB_IP");
     update_option<std::string>    (DB_USERNAME, "DB_USERNAME");
     update_option<std::string>    (DB_PASSWORD, "DB_PASSWORD");
@@ -161,6 +160,9 @@ uint16_t Config::GET_MAX_THREADS(){
         return MAX_THREADS;
     }
     return 1;
+}
+uint16_t Config::GET_SESSION_TIMEOUT(){
+    return SESSION_TIMEOUT;
 }
 
 std::string Config::GET_DB_IP(){

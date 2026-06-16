@@ -18,6 +18,10 @@
 #include <Post_Json.h>
 #include <ListDevices.h>
 #include <GetHistory.h>
+#include <AuthUser.h>
+#include <RegisterUser.h>
+#include <AuthServ.h>
+#include <AuthSession.h>
 
 void custom_access_log(const std::string& url){
     // I will probably log something here when clients connect
@@ -70,6 +74,18 @@ int main(int argc, char** argv) {
 
     get_history gh;
     ws.register_resource("/history", &gh);
+
+    auth_user au;
+    ws.register_resource("/auth/user", &au);
+    
+    auth_session asess;
+    ws.register_resource("/auth/session", &asess);
+
+    register_user ru;
+    ws.register_resource("/register", &ru);
+
+    auth_serv as;
+    ws.register_resource("/signout", &as);
 
     // start web server
     ws.start(true);

@@ -1,5 +1,6 @@
 #include <DBQ.h>
 
+#include <iomanip>
 #include <sstream>
 
 DBQ::DBQ(){
@@ -244,4 +245,114 @@ nlohmann::json DBQ::get_device_history(int deviceid, const std::string& start, c
     }
 
     return result;
+}
+
+int DBQ::get_user(const std::string& username, std::string& out_password_hash){
+    std::shared_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
+        "SELECT user_id, password_hash FROM Users WHERE username = ?"
+    ));
+
+    try{
+        stmt->setString(1, username);
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
+
+        if(res->next()){
+            out_password_hash = res->getString("password_hash").c_str();
+            return res->getInt("user_id");
+        }
+        return 0;
+    }
+    catch(sql::SQLException& e){
+        m_logger.log(Logging::severity_level::critical, e.what(), "AUTH");
+        return -1;
+    }
+}
+
+bool DBQ::create_session(int user_id, const std::string& session_id){
+    std::shared_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
+        "INSERT INTO Session_Store (session_id, user_id) VALUES (?, ?)"
+    ));
+
+    try{
+        stmt->setString(1, session_id);
+        stmt->setInt(2, user_id);
+        stmt->executeUpdate();
+        return true;
+    }
+    catch(sql::SQLException& e){
+        m_logger.log(Logging::severity_level::critical, e.what(), "AUTH");
+        return false;
+    }
+}
+
+int DBQ::create_user(const std::string& username, const std::string& password_hash){
+    std::shared_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
+        "INSERT INTO Users (username, password_hash) VALUES (?, ?)"
+    ));
+
+    try{
+        stmt->setString(1, username);
+        stmt->setString(2, password_hash);
+        stmt->executeUpdate();
+
+        std::unique_ptr<sql::Statement> id_stmt(m_conn->createStatement());
+        std::unique_ptr<sql::ResultSet> res(id_stmt->executeQuery("SELECT LAST_INSERT_ID()"));
+        if(res->next()) return res->getInt(1);
+        return -1;
+    }
+    catch(sql::SQLException& e){
+        // 1062 = ER_DUP_ENTRY (duplicate username)
+        if(e.getErrorCode() == 1062) return 0;
+        m_logger.log(Logging::severity_level::critical, e.what(), "AUTH");
+        return -1;
+    }
+}
+
+void DBQ::delete_expired_sessions(){
+    std::shared_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
+        "DELETE FROM Session_Store WHERE start_time < DATE_SUB(NOW(), INTERVAL ? MINUTE)"
+    ));
+
+    try{
+        stmt->setInt(1, config.GET_SESSION_TIMEOUT());
+        stmt->executeUpdate();
+    }
+    catch(sql::SQLException& e){
+        m_logger.log(Logging::severity_level::critical, e.what(), "AUTH");
+    }
+}
+
+int DBQ::delete_session(const std::string& session_id){
+    std::shared_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
+        "DELETE FROM Session_Store WHERE session_id = ?"
+    ));
+
+    try{
+        stmt->setString(1, session_id);
+        stmt->executeUpdate();
+        return stmt->getUpdateCount() > 0 ? 1 : 0;
+    }
+    catch(sql::SQLException& e){
+        m_logger.log(Logging::severity_level::critical, e.what(), "AUTH");
+        return -1;
+    }
+}
+
+int DBQ::validate_session(const std::string& session_id){
+    std::shared_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
+        "SELECT user_id FROM Session_Store "
+        "WHERE session_id = ? AND start_time >= DATE_SUB(NOW(), INTERVAL 10 MINUTE)"
+    ));
+
+    try{
+        stmt->setString(1, session_id);
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
+
+        if(res->next()) return res->getInt("user_id");
+        return 0;
+    }
+    catch(sql::SQLException& e){
+        m_logger.log(Logging::severity_level::critical, e.what(), "AUTH");
+        return -1;
+    }
 }

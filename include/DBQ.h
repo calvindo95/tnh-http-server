@@ -36,5 +36,19 @@ class DBQ{
         void get_last_device_data(int deviceid, nlohmann::json& json);
 
         nlohmann::json get_device_history(int deviceid, const std::string& start, const std::string& end, int bucket_minutes);
+
+        // Returns user_id (>0) if found, 0 if not found, -1 on error
+        int get_user(const std::string& username, std::string& out_password_hash);
+        bool create_session(int user_id, const std::string& session_id);
+
+        // Returns new user_id (>0) on success, 0 if username already exists, -1 on error
+        int create_user(const std::string& username, const std::string& password_hash);
+
+        void delete_expired_sessions();
+        // Returns 1 if deleted, 0 if session_id not found, -1 on error
+        int delete_session(const std::string& session_id);
+
+        // Returns user_id (>0) if session exists and is not expired, 0 if invalid/expired, -1 on error
+        int validate_session(const std::string& session_id);
 };
 #endif
