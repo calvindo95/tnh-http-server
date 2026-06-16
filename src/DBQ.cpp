@@ -316,6 +316,11 @@ void DBQ::delete_expired_sessions(){
     try{
         stmt->setInt(1, config.GET_SESSION_TIMEOUT());
         stmt->executeUpdate();
+
+        int deleted = stmt->getUpdateCount();
+        if(deleted > 0)
+            m_logger.log(Logging::severity_level::info,
+                "Deleted " + std::to_string(deleted) + " expired session(s)", "AUTH");
     }
     catch(sql::SQLException& e){
         m_logger.log(Logging::severity_level::critical, e.what(), "AUTH");
@@ -330,7 +335,10 @@ int DBQ::delete_session(const std::string& session_id){
     try{
         stmt->setString(1, session_id);
         stmt->executeUpdate();
-        return stmt->getUpdateCount() > 0 ? 1 : 0;
+        if(stmt->getUpdateCount() > 0)
+            return 1;
+        m_logger.log(Logging::severity_level::info, "Logout successfully deleted session_id: " + session_id, "AUTH");
+        return 0;
     }
     catch(sql::SQLException& e){
         m_logger.log(Logging::severity_level::critical, e.what(), "AUTH");
@@ -341,11 +349,12 @@ int DBQ::delete_session(const std::string& session_id){
 int DBQ::validate_session(const std::string& session_id){
     std::shared_ptr<sql::PreparedStatement> stmt(m_conn->prepareStatement(
         "SELECT user_id FROM Session_Store "
-        "WHERE session_id = ? AND start_time >= DATE_SUB(NOW(), INTERVAL 10 MINUTE)"
+        "WHERE session_id = ? AND start_time >= DATE_SUB(NOW(), INTERVAL ? MINUTE)"
     ));
 
     try{
         stmt->setString(1, session_id);
+        stmt->setInt(2, config.GET_SESSION_TIMEOUT());
         std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
 
         if(res->next()) return res->getInt("user_id");
