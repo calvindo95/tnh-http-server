@@ -55,35 +55,34 @@ int main(int argc, char** argv) {
     check_connection hwr;
     ws.register_resource("/check_connection", &hwr);
     
-    post_json pj;
-    ws.register_resource("/post_json", &pj);
-
-    get_single_data gsd;
-    ws.register_resource("/get_single_data", &gsd);
-    //ws.register_resource("/select", &gsd);
-
-
-    register_device rg;
-    ws.register_resource("/register_device", &rg);
-
     get_last_entry gle;
     ws.register_resource("/get_last_entry", &gle);
 
+    // Endpoint to register more devices
+    // Not used by anything but curl
+    register_device rg;
+    ws.register_resource("/register_device", &rg);
+    
+    // Endpoint used by rpiz to post data
+    post_json pj;
+    ws.register_resource("/post_json", &pj);
+    
+    // Endpoints used by tnh-vis
     list_devices ld;
     ws.register_resource("/list_devices", &ld);
-
+    get_single_data gsd;
+    ws.register_resource("/get_single_data", &gsd);
     get_history gh;
     ws.register_resource("/history", &gh);
 
-    auth_user au;
-    ws.register_resource("/auth/user", &au);
-    
-    auth_session asess;
-    ws.register_resource("/auth/session", &asess);
 
+    // User authentication endpoints
     register_user ru;
     ws.register_resource("/register", &ru);
-
+    auth_user au;
+    ws.register_resource("/auth/user", &au);
+    auth_session asess;
+    ws.register_resource("/auth/session", &asess);
     auth_serv as;
     ws.register_resource("/signout", &as);
 

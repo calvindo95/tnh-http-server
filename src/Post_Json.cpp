@@ -21,6 +21,7 @@ post_json::post_json(){
     t1.detach();
 }
 
+// Input: {"Temperature": "68.5","Humidity": "72.0","CurrentDateTime": "2026-06-16 14:30:00","DeviceName": "Hallway"}
 std::shared_ptr<httpserver::http_response> post_json::render(const httpserver::http_request& req) {
     int ret_val = 0; 
     nlohmann::json tmp_j;
