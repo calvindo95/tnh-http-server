@@ -12,6 +12,7 @@ services:
       - tnh-logs:/var/opt/tnh-server
     networks:
       - tnh-net
+      - ddp-net
 
 volumes:
   tnh-logs:
@@ -20,3 +21,6 @@ networks:
   tnh-net:
     external: true
     name: mynetv6-1
+  ddp-net:
+    external: true
+    name: ddp-server_default
