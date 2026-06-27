@@ -1,24 +1,11 @@
 #include <AuthSession.h>
 
 std::shared_ptr<httpserver::http_response> auth_session::render(const httpserver::http_request& req){
-    nlohmann::json req_json;
-    HTTPResources::get_req_body_json(req, req_json);
-
-    if(req_json.is_null() || req_json.contains("error")){
-        return std::shared_ptr<httpserver::http_response>(
-            new httpserver::string_response("{\"error\":\"Error parsing request json\"}", 400, "application/json"));
-    }
-
-    if(!req_json.contains("session_id") || !req_json["session_id"].is_string()){
-        return std::shared_ptr<httpserver::http_response>(
-            new httpserver::string_response("{\"error\":\"Missing session_id\"}", 400, "application/json"));
-    }
-
-    std::string session_id = req_json["session_id"].get<std::string>();
+    std::string session_id = HTTPResources::get_bearer_token(req);
 
     if(session_id.empty()){
         return std::shared_ptr<httpserver::http_response>(
-            new httpserver::string_response("{\"error\":\"Missing session_id\"}", 400, "application/json"));
+            new httpserver::string_response("{\"error\":\"Missing or invalid Authorization header\"}", 401, "application/json"));
     }
 
     int user_id = m_dbq.validate_session(session_id);

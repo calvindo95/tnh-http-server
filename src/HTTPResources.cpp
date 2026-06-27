@@ -15,6 +15,17 @@ void HTTPResources::parse_json(std::string json_string, nlohmann::json& json){
     return;
 }
 
+std::string HTTPResources::get_bearer_token(const httpserver::http_request &req){
+    auto headers = req.get_headers();
+    std::string auth(headers["Authorization"]);
+
+    const std::string prefix = "Bearer ";
+    if(auth.size() <= prefix.size() || auth.substr(0, prefix.size()) != prefix)
+        return "";
+
+    return auth.substr(prefix.size());
+}
+
 void HTTPResources::get_req_body_json(const httpserver::http_request &req, nlohmann::json &json){
     std::map<std::string_view, std::string_view, httpserver::http::header_comparator> headers;
     headers = req.get_headers();

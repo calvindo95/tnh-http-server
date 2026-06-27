@@ -1,0 +1,22 @@
+services:
+  tnh-server:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile_arm
+    image: tnh-server-arm
+    container_name: tnh-server
+    restart: always
+    ports:
+      - "8081:8081"
+    volumes:
+      - tnh-logs:/var/opt/tnh-server
+    networks:
+      - tnh-net
+
+volumes:
+  tnh-logs:
+
+networks:
+  tnh-net:
+    external: true
+    name: mynetv6-1
