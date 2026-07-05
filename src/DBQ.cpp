@@ -1,6 +1,5 @@
 #include <DBQ.h>
 
-#include <iomanip>
 #include <sstream>
 
 DBQ::DBQ(){
@@ -139,33 +138,10 @@ void DBQ::get_last_device_entry(int deviceid, nlohmann::json &json){
     }
 }
 
-std::string DBQ::list_device_count(){
-    std::unique_ptr<sql::PreparedStatement> pstatement(
-        m_conn->prepareStatement(
-            "SELECT d.DeviceID, d.DevName, COUNT(h.HistoryID) AS HistoryCount FROM Device d LEFT JOIN History h ON h.DeviceID = d.DeviceID GROUP BY d.DeviceID, d.DevName ORDER BY d.DeviceID ASC"
-        )
-    );
-
-    std::unique_ptr<sql::ResultSet> res(pstatement->executeQuery());
-
-    std::stringstream ss;
-    ss << std::left << std::setw(12)  << "DeviceID" << std::setw(18) << "Device Name" << std::setw(12) << "Count" << std::endl;
-
-    while(res->next()){
-        int deviceid = res->getInt(1);
-        sql::SQLString devicename = res->getString(2);
-        uint64_t count = res->getUInt64(3);
-    
-        ss << std::setw(12) << deviceid  << std::setw(18) << devicename << std::setw(12) << count << std::endl;
-    }
-
-    return ss.str();
-}
-
 nlohmann::json DBQ::list_device_count_json(){
     std::unique_ptr<sql::PreparedStatement> pstatement(
         m_conn->prepareStatement(
-            "SELECT d.DeviceID, d.DevName, COUNT(h.HistoryID) AS HistoryCount FROM Device d LEFT JOIN History h ON h.DeviceID = d.DeviceID GROUP BY d.DeviceID, d.DevName ORDER BY d.DeviceID ASC"
+            "SELECT d.DeviceID, d.DevName, (SELECT COUNT(*) FROM History h WHERE h.DeviceID = d.DeviceID AND h.CurrentDateTime >= NOW() - INTERVAL 24 HOUR) AS HistoryCount FROM Device d ORDER BY d.DeviceID ASC"
         )
     );
 
